@@ -21,7 +21,7 @@ struct View
     mutable map<GlobalNodeId,NodeId> globToLocal;
     
     bool   hasNode(GlobalNodeId globalId);
-    void   addNode(GlobalNodeId globalId);
+    void   addNode(GlobalNodeId globalId,VertProps props = VertProps());
     void   addEdge(NodeId locA,NodeId locB);
     NodeId getLocal(GlobalNodeId id) const;
 };

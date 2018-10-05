@@ -15,6 +15,7 @@ public:
     struct Edge {NodeId from, to;};
     
     virtual vector<NodeId> outEdges(NodeId id) const = 0;
+    virtual String label(NodeId id) const {return "";}
 };
 
 #endif // GVIEW_IMPORTER_HPP

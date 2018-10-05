@@ -50,7 +50,7 @@ inline View ViewLoader<T>::load(PublicNodeId nodeId, ViewParams params) const
     View view;
     
     stck.push_back(nodeId);
-    view.addNode(pubToPriv(nodeId));
+    view.addNode(pubToPriv(nodeId),VertProps{m_importer.label(nodeId)});
     
     for (int depth = 0;depth < params.depth;++depth) {
         vector<PublicNodeId> next_stck;
@@ -63,7 +63,7 @@ inline View ViewLoader<T>::load(PublicNodeId nodeId, ViewParams params) const
             for (auto target : m_importer.outEdges(public_id)) {
                 auto priv_target = pubToPriv(target);
                 if (!view.hasNode(priv_target)) {
-                    view.addNode(priv_target);
+                    view.addNode(priv_target,VertProps{m_importer.label(target)});
                     next_stck.push_back(target);
                 }
                 

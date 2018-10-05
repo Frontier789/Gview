@@ -11,6 +11,7 @@ struct Plot
 {
 	Graph graph;
 	vector<vec2> positions;
+	rect2f aabb;
 };
 
 #endif // GVIEW_PLOT_HPP

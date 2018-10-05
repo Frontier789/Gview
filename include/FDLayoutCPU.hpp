@@ -4,11 +4,11 @@
 
 struct FDLayoutCPU : public LayoutGenerator
 {
-    FDLayoutCPU(float epsilon = 0.0001) : m_epsilon(epsilon) {}
-    
-    typedef float LFloat;
+    typedef double LFloat;
     typedef vector2<LFloat> vec2lf;
     typedef rect<LFloat> rect2lf;
+    
+    FDLayoutCPU(LFloat epsilon = 0.0001) : m_epsilon(epsilon) {}
     
 protected:
 	LayoutDesc generate() override;

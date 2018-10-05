@@ -1,5 +1,6 @@
 #ifndef GVIEW_GRAPH_HPP
 #define GVIEW_GRAPH_HPP
+#include "VertProps.hpp"
 #include <iosfwd>
 #include <vector>
 using std::vector;
@@ -12,11 +13,12 @@ public:
     Graph() = default;
     Graph &operator=(Graph &&) = default;
     
-    typedef int NodeId;
-    struct OutEdge {NodeId target;};
-    vector<vector<OutEdge>> outEdges;
+    typedef VertProps::IdType NodeId;
+    typedef VertProps::EdgeType OutEdge;
     
-    size_t nodeCount() const {return outEdges.size();}
+    vector<VertProps> vertices;
+    
+    size_t nodeCount() const {return vertices.size();}
     
     void undirect();
 };

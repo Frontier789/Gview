@@ -3,15 +3,20 @@
 
 LayoutDesc FDLayoutCPU::generate()
 {
+    Clock itclk;
     size_t its = 0;
     for (;!finished() && !stopped();++its) {
         do_iteration();
     }
     
-    log_info("FDLayout","layout generation took its: " + toString(its).str());
+    log_info("FDLayout","layout generation took its: " + 
+                        toString(its).str() + " and time: " + 
+                        toString(itclk.getSeconds()*1000) + "ms");
     
     calcBoundingRect();
-    return LayoutDesc{std::move(m_positions), Graph(), m_aabb};
+    LayoutDesc desc = LayoutDesc{{}, Graph(), m_aabb};
+    desc.positions.assign(m_positions.begin(), m_positions.end());
+    return desc;
 }
 
 void FDLayoutCPU::handleNewGraph()
@@ -95,7 +100,7 @@ vec2lf FDLayoutCPU::calcNodeForce(NodeId id)
 
 void FDLayoutCPU::forEachOutEdge(NodeId id,Delegate<void, OutEdge> f)
 {
-    for (auto e : getGraph().outEdges[id])
+    for (auto e : getGraph().vertices[id].outEdges)
         f(e);
 }
 
@@ -144,8 +149,12 @@ void FDLayoutCPU::setInitialPoses()
     size_t n = nodeCount();
     fm::Angle<LFloat> base_angle = fm::deg(360.0 / n);
     
+    srand(42);
+    
     for (size_t id = 0;id < n;++id) {
-        auto polvec = polar2<LFloat>(n, base_angle * id);
-        point(id) = vec2lf(polvec);
+        float x = (double)rand() / RAND_MAX;
+        float y = (double)rand() / RAND_MAX;
+        
+        point(id) = (vec2(x,y)*2-vec2(1))*n;
     }
 }
