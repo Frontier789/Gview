@@ -4,6 +4,13 @@
 #include <iostream>
 using namespace std;
 
+GraphPlotterFlib::GraphPlotterFlib(Delegate<void,NodeId> click_cb) :
+	m_mHandler(nullptr),
+	GraphPlotter(click_cb)
+{
+	
+}
+	
 Mesh *GraphPlotterFlib::tomesh() {
 	Mesh *m = new Mesh();
 	
@@ -41,22 +48,30 @@ Mesh *GraphPlotterFlib::tomesh() {
 
 void GraphPlotterFlib::setup()
 {
+	m_tr.setCallback([&](mat4 m){
+		updateLabelp();
+		if (m_mHandler)
+			m_mHandler->transf(m);
+	});
+	
 	m_win = GuiWindow(vec2(640,480),"win");
 	m_win.setClearColor(vec4(.92,1));
 	m_tr.setOffset(m_win.getSize()/2);
 	
 	addStrLayout();
-	
+	addMouseHandler();
 	addDisplayWidget();
 }
-
 
 void GraphPlotterFlib::handleUpdate()
 {
 	log_info("GraphPlotterFlib", "Updated plot");
 	
-	focus(m_plot.aabb);
 	updateLabels();
+	
+	m_mHandler->adapt(&m_plot);
+	
+	focus(m_plot.aabb);
 	
 	Mesh *mesh = tomesh();
 	m_dd = *mesh;
@@ -78,14 +93,9 @@ void GraphPlotterFlib::addDisplayWidget()
 	};
 	w->onevent = [&](Event ev){
 		m_tr.forwardToHandlers(ev);
-		updateLabelp();
-	};
-	w->onkeypress = [&](Keyboard::Key key) {
-		cout << m_plot.aabb << " " << m_tr.getZoom() << " " << m_tr.getOffset() << endl;
 	};
 	w->onresize = [&]() {
 		focus(m_plot.aabb);
-		updateLabelp();
 	};
 	
 	m_win.getMainLayout().addChildElement(w);
@@ -99,6 +109,12 @@ void GraphPlotterFlib::addStrLayout()
 	m_strPlot.layout(layout);
 }
 
+void GraphPlotterFlib::addMouseHandler()
+{
+	m_mHandler = new ::priv::MouseHandlerFlib(m_win, [&](int i){callcb(i);}, 1);
+	m_win.getMainLayout().addChildElement(m_mHandler);
+}
+
 void GraphPlotterFlib::updateLabels()
 {
 	size_t s = m_plot.positions.size();
@@ -107,8 +123,6 @@ void GraphPlotterFlib::updateLabels()
 	
 	for (size_t i=0;i<s;++i)
 		m_strPlot.set(i, m_plot.graph.vertices[i].label);
-	
-	updateLabelp();
 }
 
 struct Rct
@@ -140,6 +154,8 @@ void GraphPlotterFlib::updateLabelp()
 
 void GraphPlotterFlib::focus(rect2f area)
 {
+	if (!area.size.area()) return;
+	
 	vec2 s = m_win.getSize();
 	float z = (s / area.size).min() * .9;
 	vec2  p = s/2 - area.mid()*z;
@@ -170,6 +186,7 @@ GraphPlotterFlib::Result GraphPlotterFlib::displayLoop()
 	setup();
 	guiLoop();
 	clean();
+	log_info("plotter","plot finished");
 	
 	return 0;
 }
@@ -195,6 +212,8 @@ namespace
 
 void unintersect(vector<Rct> &rcts)
 {
+	if (!rcts.size()) return;
+	
 	sort(rcts.begin(),rcts.end(),smallerY);
 	Rct *from = &rcts[0];
 	int i1=0,i2=0;
@@ -214,3 +233,4 @@ void unintersect(vector<Rct> &rcts)
 		i1++;
 	}
 }
+

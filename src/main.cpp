@@ -44,26 +44,18 @@ public:
 
 
 // TODO:
-//     class that runs a graphplotter on a separate thread
-//      - how to communicate?
 //     latice drawing
-
+//     graphml importer
+//     clickable nodes xd
 
 int main() {
-    
-    // rect2f a(310.909,184.472,84,14);
-    // rect2f b(322.793,179.735,84,14);
-    // cout << a.intersects(b) << endl;
-    // cout << (a.pos.x < b.pos.x + b.size.w && a.pos.x + a.size.w > b.pos.x &&
-    //         a.pos.y < b.pos.y + b.size.h && a.pos.y + a.size.h > b.pos.y) << endl;
-    // return 0;
-    
     ViewLoader<MyImporter> vl;
     
+    auto v0 = vl.load(avec2i{1,1},ViewParams{3});
     auto v1 = vl.load(avec2i{2,2},ViewParams{3});
    
     FDLayoutCPU gen(0.000001);
-    gen.run(std::move(v1.graph));
+    gen.start(std::move(v1.graph));
     
     cout << "gen started\n";
     gen.wait(1);
@@ -82,7 +74,25 @@ int main() {
     p.positions = std::move(desc.positions);
     p.aabb = desc.aabb;
     
-    GraphPlotterFlib plt;
+    GraphPlotterFlib plt([&](int id){
+        auto glob = v1.toGlobal(id);
+        auto publ = vl.privToPub(glob);
+        cout << "{" << id << ","
+                    << glob << ","
+                    << "(" << publ.x << "," << publ.y << ")" << "}" << endl;
+        
+        v1 = std::move(vl.load(publ,ViewParams{2}));
+        FDLayoutCPU gen(0.000001);
+        gen.start(std::move(v1.graph));
+        gen.wait();
+        LayoutDesc desc = gen.layout();
+        
+        Plot p;
+        p.graph = std::move(desc.graph);
+        p.positions = std::move(desc.positions);
+        p.aabb = desc.aabb;
+        plt.plot(std::move(p));
+    });
     plt.start();
     plt.plot(std::move(p));
     plt.wait();

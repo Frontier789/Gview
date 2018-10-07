@@ -1,6 +1,7 @@
 #ifndef GVIEW_VIEWLOADER_HPP
 #define GVIEW_VIEWLOADER_HPP
 #include "ViewParams.hpp"
+#include "Logger.hpp"
 #include "View.hpp"
 #include <iosfwd>
 
@@ -20,12 +21,13 @@ struct ViewLoader
     ViewLoader(ViewLoader&&) = default;
     ViewLoader() = default;
     
+    PrivateNodeId pubToPriv(PublicNodeId pub) const;
+    PublicNodeId  privToPub(PrivateNodeId priv) const;
+    
 private:
     T m_importer;
     mutable map<PublicNodeId,PrivateNodeId> m_pubToPriv;
     mutable map<PrivateNodeId,PublicNodeId> m_privToPub;
-    
-    PrivateNodeId pubToPriv(PublicNodeId pub) const;
 };
 
 template<class T>
@@ -42,7 +44,20 @@ inline typename ViewLoader<T>::PrivateNodeId ViewLoader<T>::pubToPriv(PublicNode
     
     return it->second;
 }
+
+template<class T>
+inline typename ViewLoader<T>::PublicNodeId ViewLoader<T>::privToPub(PrivateNodeId priv) const
+{
+    auto it = m_privToPub.find(priv);
     
+    if (it == m_privToPub.end()) {
+        log_error("ViewLoader","Requested unknown node id " + toString(priv).str());
+        return PublicNodeId();
+    }
+    
+    return it->second;
+}
+
 template<class T>
 inline View ViewLoader<T>::load(PublicNodeId nodeId, ViewParams params) const
 {
@@ -58,7 +73,7 @@ inline View ViewLoader<T>::load(PublicNodeId nodeId, ViewParams params) const
         while (!stck.empty()) {
             auto public_id  = stck.back(); stck.pop_back();
             auto private_id = pubToPriv(public_id);
-            auto local_id   = view.getLocal(private_id);
+            auto local_id   = view.toLocal(private_id);
             
             for (auto target : m_importer.outEdges(public_id)) {
                 auto priv_target = pubToPriv(target);
@@ -67,7 +82,7 @@ inline View ViewLoader<T>::load(PublicNodeId nodeId, ViewParams params) const
                     next_stck.push_back(target);
                 }
                 
-                view.addEdge(local_id, view.getLocal(priv_target));
+                view.addEdge(local_id, view.toLocal(priv_target));
             }
         }
         stck.swap(next_stck);

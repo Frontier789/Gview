@@ -23,6 +23,11 @@ void View::addEdge(NodeId locA,NodeId locB) {
     graph.vertices[locA].outEdges.push_back(OutEdge{locB});
 }
 
-View::NodeId View::getLocal(GlobalNodeId id) const {
+View::NodeId View::toLocal(GlobalNodeId id) const {
     return globToLocal[id];
+}
+
+View::GlobalNodeId View::toGlobal(NodeId id) const
+{
+    return globalIds[id];
 }

@@ -3,7 +3,7 @@
 #include <thread>
 #include <chrono>
 
-void LayoutGenerator::run(Graph graph)
+void LayoutGenerator::start(Graph graph)
 {
 	stop();
 	

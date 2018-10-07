@@ -18,7 +18,7 @@ struct LayoutDesc
 
 struct LayoutGenerator
 {
-	void run(Graph graph);
+	void start(Graph graph);
 	LayoutDesc layout();
 	bool ready();
 	void wait(fm::Time timeout);

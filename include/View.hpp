@@ -15,6 +15,7 @@ struct View
     View(const View&) = delete;
     View(View&&) = default;
     View() = default;
+    View &operator=(View&&) = default;
     
     Graph graph;
     vector<GlobalNodeId> globalIds;
@@ -23,7 +24,8 @@ struct View
     bool   hasNode(GlobalNodeId globalId);
     void   addNode(GlobalNodeId globalId,VertProps props = VertProps());
     void   addEdge(NodeId locA,NodeId locB);
-    NodeId getLocal(GlobalNodeId id) const;
+    NodeId toLocal(GlobalNodeId id) const;
+    GlobalNodeId toGlobal(NodeId id) const;
 };
 
 std::ostream &operator<<(std::ostream &out,const View &v);

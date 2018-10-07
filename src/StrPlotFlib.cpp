@@ -17,7 +17,6 @@ namespace priv
 		m_layout->setChildCount(n);
 		auto &cont = m_layout->getOwnerContext();
 		
-		if (m_size) exit(1);
 		for (size_t i=m_size;i<n;++i) {
 			auto txt = new GuiText(cont);
 			txt->setCharacterSize(12);
