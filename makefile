@@ -8,4 +8,3 @@ ifeq ($(wildcard $(FPATH)/include/FRONTIER/Makefiles/fproject.mk),)
 else 
   include $(FPATH)/include/FRONTIER/Makefiles/fproject.mk
 endif 
-

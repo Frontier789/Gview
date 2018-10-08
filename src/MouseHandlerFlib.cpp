@@ -1,8 +1,6 @@
 #include "GraphPlotterFlib.hpp"
 #include "Utility.hpp"
 #include "Logger.hpp"
-#include <iostream>
-using namespace std;
 
 namespace priv
 {

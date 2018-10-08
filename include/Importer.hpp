@@ -1,5 +1,6 @@
 #ifndef GVIEW_IMPORTER_HPP
 #define GVIEW_IMPORTER_HPP
+#include <Frontier.hpp>
 #include <vector>
 using std::vector;
 

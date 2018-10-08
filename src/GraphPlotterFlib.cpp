@@ -4,6 +4,8 @@
 #include <iostream>
 using namespace std;
 
+#define R 1
+
 GraphPlotterFlib::GraphPlotterFlib(Delegate<void,NodeId> click_cb) :
 	m_mHandler(nullptr),
 	GraphPlotter(click_cb)
@@ -15,7 +17,7 @@ Mesh *GraphPlotterFlib::tomesh() {
 	Mesh *m = new Mesh();
 	
 	int N = 15;
-	float r = 1;
+	float r = R;
 	for (size_t i=0;i<m_plot.positions.size();++i) {
 		for (int n=0;n<N;++n) {
 			pol2 r0(r, deg(n*360.0/(N-1)));
@@ -71,6 +73,9 @@ void GraphPlotterFlib::handleUpdate()
 	
 	m_mHandler->adapt(&m_plot);
 	
+	m_plot.aabb.pos -= vec2(R);
+	m_plot.aabb.size += vec2(2*R);
+	cout << "updated plot has aabb " << m_plot.aabb << endl;
 	focus(m_plot.aabb);
 	
 	Mesh *mesh = tomesh();
@@ -111,7 +116,7 @@ void GraphPlotterFlib::addStrLayout()
 
 void GraphPlotterFlib::addMouseHandler()
 {
-	m_mHandler = new ::priv::MouseHandlerFlib(m_win, [&](int i){callcb(i);}, 1);
+	m_mHandler = new ::priv::MouseHandlerFlib(m_win, [&](int i){callcb(i);}, R);
 	m_win.getMainLayout().addChildElement(m_mHandler);
 }
 
@@ -212,7 +217,7 @@ namespace
 
 void unintersect(vector<Rct> &rcts)
 {
-	if (!rcts.size()) return;
+	if (rcts.size() < 2) return;
 	
 	sort(rcts.begin(),rcts.end(),smallerY);
 	Rct *from = &rcts[0];
