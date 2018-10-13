@@ -71,6 +71,7 @@
         "numeric": "cpp",
         "sstream": "cpp",
         "thread": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "optional": "cpp"
     }
 }

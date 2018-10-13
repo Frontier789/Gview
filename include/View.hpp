@@ -1,5 +1,6 @@
 #ifndef GVIEW_VIEW_HPP
 #define GVIEW_VIEW_HPP
+#include "Importer.hpp"
 #include "Graph.hpp"
 #include <vector>
 #include <map>
@@ -10,7 +11,7 @@ struct View
 {
     typedef Graph::NodeId NodeId;
     typedef Graph::OutEdge OutEdge;
-    typedef int GlobalNodeId;
+    typedef DerefImporter::PrivateId GlobalId;
     
     View(const View&) = delete;
     View(View&&) = default;
@@ -18,14 +19,14 @@ struct View
     View &operator=(View&&) = default;
     
     Graph graph;
-    vector<GlobalNodeId> globalIds;
-    mutable map<GlobalNodeId,NodeId> globToLocal;
+    vector<GlobalId> globalIds;
+    mutable map<GlobalId,NodeId> globToLocal;
     
-    bool   hasNode(GlobalNodeId globalId);
-    void   addNode(GlobalNodeId globalId,VertProps props = VertProps());
+    bool   hasNode(GlobalId globalId);
+    void   addNode(GlobalId globalId,VertProps props = VertProps());
     void   addEdge(NodeId locA,NodeId locB);
-    NodeId toLocal(GlobalNodeId id) const;
-    GlobalNodeId toGlobal(NodeId id) const;
+    NodeId toLocal(GlobalId id) const;
+    GlobalId toGlobal(NodeId id) const;
 };
 
 std::ostream &operator<<(std::ostream &out,const View &v);

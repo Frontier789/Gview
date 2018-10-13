@@ -5,92 +5,19 @@
 #include "View.hpp"
 #include <iosfwd>
 
-template<class T>
 struct ViewLoader
 {
-    typedef int PrivateNodeId; 
-    typedef typename T::NodeId PublicNodeId;
-    typedef typename T::Edge   PublicEdge;
+    typedef View::NodeId LocalId;
+    typedef DerefImporter::PrivateId GlobalId;
     
-    template<class... Params>
-    ViewLoader(Params&&... params) : m_importer(std::forward<Params>(params)...) {}
-    
-    View load(PublicNodeId nodeId, ViewParams params) const;
+    View load(GlobalId nodeId, ViewParams params) const;
     
     ViewLoader(const ViewLoader&) = delete;
     ViewLoader(ViewLoader&&) = default;
-    ViewLoader() = default;
-    
-    PrivateNodeId pubToPriv(PublicNodeId pub) const;
-    PublicNodeId  privToPub(PrivateNodeId priv) const;
+    ViewLoader(DerefImporter *importer);
     
 private:
-    T m_importer;
-    mutable map<PublicNodeId,PrivateNodeId> m_pubToPriv;
-    mutable map<PrivateNodeId,PublicNodeId> m_privToPub;
+    std::unique_ptr<DerefImporter> m_importer;
 };
-
-template<class T>
-inline typename ViewLoader<T>::PrivateNodeId ViewLoader<T>::pubToPriv(PublicNodeId pub) const
-{
-    auto it = m_pubToPriv.find(pub);
-    
-    if (it == m_pubToPriv.end()) {
-        auto s = m_pubToPriv.size();
-        m_pubToPriv[pub] = s;
-        m_privToPub[s] = pub;
-        return s;
-    }
-    
-    return it->second;
-}
-
-template<class T>
-inline typename ViewLoader<T>::PublicNodeId ViewLoader<T>::privToPub(PrivateNodeId priv) const
-{
-    auto it = m_privToPub.find(priv);
-    
-    if (it == m_privToPub.end()) {
-        log_error("ViewLoader","Requested unknown node id " + toString(priv).str());
-        return PublicNodeId();
-    }
-    
-    return it->second;
-}
-
-template<class T>
-inline View ViewLoader<T>::load(PublicNodeId nodeId, ViewParams params) const
-{
-    vector<PublicNodeId> stck;
-    View view;
-    
-    stck.push_back(nodeId);
-    view.addNode(pubToPriv(nodeId),VertProps{m_importer.label(nodeId)});
-    
-    for (int depth = 0;depth < params.depth;++depth) {
-        vector<PublicNodeId> next_stck;
-        
-        while (!stck.empty()) {
-            auto public_id  = stck.back(); stck.pop_back();
-            auto private_id = pubToPriv(public_id);
-            auto local_id   = view.toLocal(private_id);
-            
-            for (auto target : m_importer.outEdges(public_id)) {
-                auto priv_target = pubToPriv(target);
-                if (!view.hasNode(priv_target)) {
-                    view.addNode(priv_target,VertProps{m_importer.label(target)});
-                    next_stck.push_back(target);
-                }
-                
-                view.addEdge(local_id, view.toLocal(priv_target));
-            }
-        }
-        stck.swap(next_stck);
-    }
-    
-    view.graph.undirect();
-    
-    return view;
-}
 
 #endif // GVIEW_VIEWLOADER_HPP
