@@ -1,6 +1,7 @@
 #ifndef GVIEW_IMPORTER_HPP
 #define GVIEW_IMPORTER_HPP
 #include <Frontier.hpp>
+#include "IdTypes.hpp"
 #include <vector>
 #include <map>
 using std::vector;
@@ -11,8 +12,9 @@ public:
     DerefImporter(const DerefImporter&) = delete;
     DerefImporter(DerefImporter&&) = default;
     DerefImporter() = default;
+    virtual ~DerefImporter() = default;
     
-    typedef int PrivateId;
+    typedef PrivateGlobalNodeId PrivateId;
     
     virtual vector<PrivateId> outEdgesGlob(PrivateId id) const  = 0;
     virtual String labelGlob(PrivateId id) const = 0;
@@ -24,6 +26,7 @@ struct Importer : public DerefImporter
     Importer(const Importer&) = delete;
     Importer(Importer&&) = default;
     Importer() = default;
+    virtual ~Importer() = default;
     
     typedef NodeIdT NodeId;
     typedef NodeIdT PublicId;
@@ -66,7 +69,7 @@ inline NodeIdT Importer<NodeIdT>::toPub(PrivateId priv) const
 }
 
 template<class NodeIdT>
-vector<typename Importer<NodeIdT>::PrivateId> Importer<NodeIdT>::outEdgesGlob(PrivateId id) const 
+inline vector<typename Importer<NodeIdT>::PrivateId> Importer<NodeIdT>::outEdgesGlob(PrivateId id) const 
 {
     auto nids = outEdges(toPub(id));
     vector<PrivateId> ret;
@@ -79,7 +82,7 @@ vector<typename Importer<NodeIdT>::PrivateId> Importer<NodeIdT>::outEdgesGlob(Pr
 }
 
 template<class NodeIdT>
-String Importer<NodeIdT>::labelGlob(PrivateId id) const 
+inline String Importer<NodeIdT>::labelGlob(PrivateId id) const 
 {
     return label(toPub(id));
 }

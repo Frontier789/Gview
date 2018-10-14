@@ -1,22 +1,19 @@
 #ifndef GVIEW_GVIEW_HPP
 #define GVIEW_GVIEW_HPP
 #include "GraphPlotterFlib.hpp"
-#include "FDLayoutCPU.hpp"
+#include "LayoutGenerator.hpp"
 #include "ViewLoader.hpp"
 #include "ViewParams.hpp"
+#include "Groupper.hpp"
+#include "Importer.hpp"
+#include "IdTypes.hpp"
 #include "View.hpp"
 
 struct Gview
 {
-    typedef ViewLoader::GlobalId NodeId;
+    typedef LocalNodeId NodeId;
     
-    Gview(DerefImporter *importer) :
-        m_viewLo(importer),
-        m_lgen(0.000001),
-        m_plotter([&](int id){loadSync(toPublicId(id));})
-    {
-        
-    }
+    Gview(DerefImporter *importer,LayoutGenerator *layoutgen,DerefGroupper *groupper = nullptr);
     
     void start(NodeId id, ViewParams params);
     void stop() {m_plotter.stop();};
@@ -25,7 +22,7 @@ struct Gview
 private:
     ViewLoader m_viewLo;
     View m_curView;
-    FDLayoutCPU m_lgen;
+    std::unique_ptr<LayoutGenerator> m_lgen;
     GraphPlotterFlib m_plotter;
     ViewParams m_vpar;
     

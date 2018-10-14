@@ -13,7 +13,7 @@ public:
     Graph() = default;
     Graph &operator=(Graph &&) = default;
     
-    typedef VertProps::IdType NodeId;
+    typedef VertProps::NodeId NodeId;
     typedef VertProps::EdgeType OutEdge;
     
     vector<VertProps> vertices;

@@ -1,4 +1,14 @@
 #include "Gview.hpp"
+#include <iostream>
+using namespace std;
+
+Gview::Gview(DerefImporter *importer,LayoutGenerator *layoutgen,DerefGroupper *groupper) :
+    m_viewLo(importer,groupper ? groupper : new NoGroupper()),
+    m_lgen(layoutgen),
+    m_plotter([&](int id){loadSync(toPublicId(id));})
+{
+    
+}
 
 void Gview::start(NodeId id, ViewParams params)
 {
@@ -11,10 +21,14 @@ void Gview::start(NodeId id, ViewParams params)
 void Gview::loadSync(NodeId id)
 {
     m_curView = std::move(m_viewLo.load(id,m_vpar));
-    m_lgen.start(std::move(m_curView.graph));
-    m_lgen.wait();
+    m_lgen->start(std::move(m_curView.graph));
+    m_lgen->wait(seconds(7));
+    if (!m_lgen->ready()) {
+        cout << "Layout gen timed out" << endl;
+        m_lgen->stop();
+    }
     
-    LayoutDesc desc = m_lgen.layout();
+    LayoutDesc desc = m_lgen->layout();
     
     Plot p;
     p.graph = std::move(desc.graph);

@@ -18,7 +18,7 @@ Mesh *GraphPlotterFlib::tomesh() {
 	
 	int N = 15;
 	float r = R;
-	for (size_t i=0;i<m_plot.positions.size();++i) {
+	for (::size_t i=0;i<m_plot.positions.size();++i) {
 		for (int n=0;n<N;++n) {
 			pol2 r0(r, deg(n*360.0/(N-1)));
 			pol2 r1(r, deg((n+1)*360.0/(N-1)));
@@ -27,9 +27,9 @@ Mesh *GraphPlotterFlib::tomesh() {
 		}
 	}
 	
-	for (size_t i=0;i<m_plot.positions.size();++i) {
+	for (::size_t i=0;i<m_plot.positions.size();++i) {
 		for (auto e : m_plot.graph.vertices[i].outEdges) {
-			size_t j = e.target;
+			::size_t j = e.target;
 			vec2 A = m_plot.positions[i];
 			vec2 B = m_plot.positions[j];
 			float l = (A-B).length();
@@ -57,7 +57,7 @@ void GraphPlotterFlib::setup()
 	});
 	
 	m_win = GuiWindow(vec2(640,480),"win");
-	m_win.setClearColor(vec4(.92,1));
+	m_win.setClearColor(vec4(.99,1));
 	m_tr.setOffset(m_win.getSize()/2);
 	
 	addStrLayout();
@@ -122,28 +122,28 @@ void GraphPlotterFlib::addMouseHandler()
 
 void GraphPlotterFlib::updateLabels()
 {
-	size_t s = m_plot.positions.size();
+	::size_t s = m_plot.positions.size();
 	
 	m_strPlot.resize(s);
 	
-	for (size_t i=0;i<s;++i)
+	for (::size_t i=0;i<s;++i)
 		m_strPlot.set(i, m_plot.graph.vertices[i].label);
 }
 
 struct Rct
 {
 	vec2 p,s;
-	size_t i;
+	::size_t i;
 };
 void unintersect(vector<Rct> &rcts);
 
 void GraphPlotterFlib::updateLabelp()
 {
-	size_t s = m_plot.positions.size();
+	::size_t s = m_plot.positions.size();
 	
 	vector<Rct> rcts(s);
 	
-	for (size_t i=0;i<s;++i) {
+	for (::size_t i=0;i<s;++i) {
 		vec2 p = m_plot.positions[i];
 		p = m_tr.getTransformMatrix() * vec4(p,0,1);
 		rcts[i] = Rct{p + vec2(0,m_tr.getZoom()), m_strPlot.size(i), i};

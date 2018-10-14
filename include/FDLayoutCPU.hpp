@@ -26,7 +26,7 @@ private:
     LFloat m_largestDiff;
     LFloat m_epsilon;
     
-    size_t nodeCount() const {return getGraph().nodeCount();}
+    ::size_t nodeCount() const {return getGraph().nodeCount();}
     vec2lf &point(NodeId id) {return m_positions[id];}
     
     void setLargestDiff(LFloat d) {m_largestDiff = d;}

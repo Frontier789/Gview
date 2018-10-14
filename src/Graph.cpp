@@ -19,7 +19,7 @@ void Graph::undirect()
     
     for (size_t id = 0;id<nodeCount();++id) {
         for (OutEdge e : vertices[id].outEdges) {
-            newOutEdges[e.target].push_back(OutEdge{int(id)});
+            newOutEdges[e.target].push_back(OutEdge{NodeId(id)});
         }
     }
     

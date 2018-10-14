@@ -9,11 +9,11 @@ std::ostream &operator<<(std::ostream &out,const View &v) {
     return out;
 }
 
-bool View::hasNode(GlobalNodeId globalId) {
+bool View::hasNode(GlobalId globalId) {
     return globToLocal.find(globalId) != globToLocal.end();
 }
 
-void View::addNode(GlobalNodeId globalId,VertProps props) {
+void View::addNode(GlobalId globalId,VertProps props) {
     graph.vertices.push_back(props);
     globalIds.push_back(globalId);
     globToLocal[globalId] = globalIds.size()-1;
@@ -23,11 +23,11 @@ void View::addEdge(NodeId locA,NodeId locB) {
     graph.vertices[locA].outEdges.push_back(OutEdge{locB});
 }
 
-View::NodeId View::toLocal(GlobalNodeId id) const {
+View::NodeId View::toLocal(GlobalId id) const {
     return globToLocal[id];
 }
 
-View::GlobalNodeId View::toGlobal(NodeId id) const
+View::GlobalId View::toGlobal(NodeId id) const
 {
     return globalIds[id];
 }

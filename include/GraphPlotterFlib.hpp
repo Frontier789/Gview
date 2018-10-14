@@ -10,13 +10,13 @@ namespace priv
 		StrPlotFlib();
 		
 		void layout(GuiLayout *layout);
-		void resize(size_t n);
-		void set(size_t i,String str);
-		void set(size_t i,vec2 pos);
-		vec2 size(size_t i);
+		void resize(::size_t n);
+		void set(::size_t i,String str);
+		void set(::size_t i,vec2 pos);
+		vec2 size(::size_t i);
 	private:
 		GuiLayout *m_layout;
-		size_t m_size;
+		::size_t m_size;
 	};
 	
 	struct MouseHandlerFlib : public GuiElement, public ClickListener

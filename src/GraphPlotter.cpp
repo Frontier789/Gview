@@ -51,7 +51,7 @@ bool GraphPlotter::running()
 	return true;
 }
 
-GraphPlotter::GraphPlotter(Delegate<void,int> click_cb) :
+GraphPlotter::GraphPlotter(Delegate<void,NodeId> click_cb) :
 	m_onclick(click_cb),
 	m_newplot(nullptr),
 	m_stopped(false),
