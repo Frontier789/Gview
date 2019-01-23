@@ -1,33 +1,40 @@
-#ifndef GVIEW_VIEW_HPP
-#define GVIEW_VIEW_HPP
-#include "Graph.hpp"
-#include <vector>
-#include <map>
-using std::vector;
-using std::map;
+#ifndef GVIEW_VIEW
+#define GVIEW_VIEW
+
+#include <Frontier.hpp>
+using namespace std;
+
+#include "Layout.hpp"
 
 struct View
 {
-    typedef Graph::NodeId NodeId;
-    typedef Graph::OutEdge OutEdge;
-    typedef int GlobalNodeId;
+    struct Edge {
+        struct Visuals {
+            float width;
+            
+        } visuals;
+        size_t to;
+        
+    };
     
-    View(const View&) = delete;
-    View(View&&) = default;
-    View() = default;
-    View &operator=(View&&) = default;
+    struct Node {
+        struct Visuals {
+            float size;
+            
+        } visuals;
+        
+        struct Body {
+            vec2 pos;
+            float mass;
+        } body;
+        
+        vector<Edge> edges;
+    };
+    vector<Node> graph;
     
-    Graph graph;
-    vector<GlobalNodeId> globalIds;
-    mutable map<GlobalNodeId,NodeId> globToLocal;
-    
-    bool   hasNode(GlobalNodeId globalId);
-    void   addNode(GlobalNodeId globalId,VertProps props = VertProps());
-    void   addEdge(NodeId locA,NodeId locB);
-    NodeId toLocal(GlobalNodeId id) const;
-    GlobalNodeId toGlobal(NodeId id) const;
+    Layout getLayout() const;
+    void setLayout(const Layout &layout);
+    size_t size() const {return graph.size();}
 };
 
-std::ostream &operator<<(std::ostream &out,const View &v);
-
-#endif // GVIEW_VIEW_HPP
+#endif
