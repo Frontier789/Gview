@@ -3,26 +3,23 @@
 #include <iomanip>
 #include <iostream>
 
-void FDCpu::init(View &view)
+void FDCpu::init(const View &view)
 {
     init_graph(view);
     m_bodies.resize(view.size());
     init_bodies();
     
     m_h = m_rk.h0;
-    
-    if (view.graph.size() < 30)
-        print_graph();
 }
 
-void FDCpu::print_graph()
+void FDCpu::print_graph(std::ostream &out)
 {
-    cout << m_graph.size() << endl;
+    out << m_graph.size() << endl;
     for (auto &a : m_graph) {
         for (auto &b : a) {
-            cout << b.strength << " ";
+            out << b.strength << " ";
         }
-        cout << endl;
+        out << endl;
     }
 }
 
@@ -33,13 +30,13 @@ void FDCpu::init_bodies()
     Anglef base = fm::deg(360.0 / n);
     
     for (size_t id = 0;id < n;++id) {
-        m_bodies[id].p = pol2(100, base * id);
+        m_bodies[id].p = pol2(100 + random.real(-50,50), base * (id + random.real(-180,180)));
         m_bodies[id].v = vec2(0);
         m_bodies[id].m = 1;
     }
 }
 
-void FDCpu::init_graph(View &view)
+void FDCpu::init_graph(const View &view)
 {
     m_graph.clear();
     size_t noden = view.graph.size();
@@ -65,7 +62,7 @@ void FDCpu::run()
         // Sleep(milliseconds(1)); ///< Spare cpu ...?
         
         update_bodies();
-        if (m_s < 0.01 && step > 30) finished = true;
+        if (m_s < 0.001 && step > 30) finished = true;
         
         std::lock_guard<std::mutex> guard(m_layoutMut);
         C(m_layout.size())
@@ -88,11 +85,6 @@ double FDCpu::distance(const vector<Body> &bodiesFrom,const vector<Body> &bodies
 // http://www.aip.de/groups/soe/local/numres/bookcpdf/c16-2.pdf
 void FDCpu::update_bodies()
 {
-    // for (auto b : bodies) {
-    //     cout << fixed << setprecision(4);
-    //     cout << "p = " << b.p << " v = " << b.v << endl;
-    // } cout << endl;
-    
     auto bodies_cpy_H = m_bodies;
     auto bodies_cpy_E = m_bodies;
     double e;
@@ -106,18 +98,10 @@ void FDCpu::update_bodies()
         
         e = distance(bodies_cpy_H,bodies_cpy_E);
         
-        // cout << "error = " << fixed << setprecision(15) << e << endl;
-        // cout << "eps   = " << fixed << setprecision(15) << m_rk.eps << endl;
-        
         double N = m_rk.eps >= e ? m_rk.N_h : m_rk.N_e;
         
         m_h = 0.96*pow(m_rk.eps / e,1.0/N)*m_h;
-        // cout << "new h = " << m_h << endl;
     } while (e >= m_rk.eps);
-    
-    // cout << "h = " << m_h << endl;
-    // cout << "e = " << fixed << setprecision(15) << e << endl;
-    // cout << endl;
     
     m_s = distance(m_bodies,bodies_cpy_E);
     

@@ -6,27 +6,6 @@ using namespace std;
 #include "FDCpu.hpp"
 #include "ViewPlotter.hpp"
 
-class Random
-{
-    std::mt19937_64 m_gen;
-
-public:
-    Random(int seed) : m_gen(seed) {}
-    
-    double real(double beg = 0,double end = 1);
-    size_t integer(size_t beg = 0,size_t end = size_t(-1));
-};
-
-double Random::real(double beg,double end) {
-    std::uniform_real_distribution<double> distribution(beg, end);
-    return distribution(m_gen);
-}
-
-size_t Random::integer(size_t beg,size_t end) {
-    std::uniform_int_distribution<size_t> distribution(beg, end);
-    return distribution(m_gen);
-}
-
 Random random(42);
 
 View getTestView()
@@ -36,7 +15,8 @@ View getTestView()
     View v;
     size_t n = 5;
     Cx(n)Cy(n) {
-        v.graph.push_back({{10}, {vec2(),1}, {}});
+        String label = "{" + fm::toString(x) + "," + fm::toString(y) + "}";
+        v.graph.push_back({{10,{label}}, {vec2(),1}, {}});
     }
     
     Cx(n)Cy(n) {
@@ -60,20 +40,16 @@ int main() {
     
     win.addElement(plotter);
     
-    FDCpu *gen = new FDCpu(RKDesc::heun_euler(),true);
-    gen->start(plotter->m_view);
+    FDCpu *gen = new FDCpu(RKDesc::fehlberg(),true);
+    gen->start(plotter->view());
     
-    bool done = false;
     Clock clk;
-    win.runGuiLoop([&]{
-        if (!gen->ready())
-            plotter->setLayout(gen->layout());
-        else if (!done) {
-            done = true;
-            cout << "generation done" << endl;
-            cout << "t = " << clk.s()*1000 << "ms" << endl;
-        }
-    });
+    gen->wait();
+    plotter->setLayout(gen->layout());
+    cout << "generation done" << endl;
+    cout << "t = " << clk.s()*1000 << "ms" << endl;
+    
+    win.runGuiLoop();
     
     ofstream out_log("out.log");
     bool fst;

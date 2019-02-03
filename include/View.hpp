@@ -20,6 +20,10 @@ struct View
     struct Node {
         struct Visuals {
             float size;
+            struct Label {
+                String text;
+                
+            } label;
             
         } visuals;
         

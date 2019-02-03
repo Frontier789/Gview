@@ -6,17 +6,18 @@ using namespace std;
 
 #include "LayoutGen.hpp"
 #include "RKDesc.hpp"
+#include "Random.hpp"
 
 struct FDCpu : public LayoutGen
 {
-    FDCpu(RKDesc rk = RKDesc::fehlberg(),bool do_logging = false) : m_rk(rk) { log.do_log = do_logging; }
+    FDCpu(RKDesc rk = RKDesc::fehlberg(),bool do_logging = false) : m_rk(rk), random(42) { log.do_log = do_logging; }
     
-    void init(View &view) override;
+    void init(const View &view) override;
     void run() override;
     
     void init_bodies();
-    void init_graph(View &view);
-    void print_graph();
+    void init_graph(const View &view);
+    void print_graph(std::ostream &out);
     void update_bodies();
     
     struct Log {
@@ -42,6 +43,8 @@ private:
     vector<Body> m_bodies;
     double m_h;
     double m_s;
+    
+    Random random;
     
     double distance(const vector<Body> &bodiesFrom,const vector<Body> &bodiesTo);
     

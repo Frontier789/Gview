@@ -11,7 +11,7 @@ LayoutGen::~LayoutGen()
     stop();
 }
 
-void LayoutGen::start(View &view)
+void LayoutGen::start(const View &view)
 {
     if (m_fut.valid() && !::ready(m_fut))
         wait();
@@ -53,7 +53,7 @@ Layout LayoutGen::layout() const
     return m_layout;
 }
 
-void LayoutGen::gen_init(View &view)
+void LayoutGen::gen_init(const View &view)
 {
     m_layout = std::move(view.getLayout());
 }

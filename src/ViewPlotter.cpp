@@ -2,14 +2,17 @@
 
 ViewPlotter::ViewPlotter(GuiContext &owner) : 
     GuiElement(owner, owner.getSize()),
-    m_empty(true)
+    m_empty(true),
+	m_labels(owner,false)
 {
-    
+    setOffset(getSize()/2);
 }
     
 void ViewPlotter::setView(View view)
 {
     m_view = std::move(view);
+	m_labels.setView(m_view);
+	
     m_empty = false;
     createDD();
 }
@@ -18,6 +21,7 @@ void ViewPlotter::setLayout(Layout layout)
 {
     if (!m_empty) {
         m_view.setLayout(layout);
+		m_labels.setLayout(layout);
         
         createDD();
     }
@@ -28,18 +32,23 @@ void ViewPlotter::onDraw(fg::ShaderManager &shader)
     shader.getModelStack().push(getTransformMatrix());
     shader.draw(m_dd);
     shader.getModelStack().pop();
+	
+	m_labels.onDraw(shader);
+}
+
+void ViewPlotter::onTransform()
+{
+	m_labels.setTransform(getTransformMatrix());
 }
 
 void ViewPlotter::createDD()
 {
     Mesh m;
-    
-    vec2 offset = getSize()/2;
-    
-	int N = 15;
+	
 	for (auto &node : m_view.graph) {
         float r = node.visuals.size;
         
+		int N = 6*r*getZoom();
 		for (int n=0;n<N;++n) {
 			pol2 r0(r, deg(n*360.0/(N-1)));
 			pol2 r1(r, deg((n+1)*360.0/(N-1)));
@@ -68,8 +77,6 @@ void ViewPlotter::createDD()
 			}
 		}
 	}
-	
-    for (auto &p : m.pts) p += offset;
     
 	m.clr.resize(m.pts.size(),vec4::Black);
     m.faces.push_back(Mesh::Face(fg::Lines));

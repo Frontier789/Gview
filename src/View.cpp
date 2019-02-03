@@ -16,7 +16,7 @@ Layout View::getLayout() const
 void View::setLayout(const Layout &layout)
 {
     if (layout.size() != size()) {
-        cout << "Fatal error: setting layout of size: " 
+        cerr << "Fatal error: setting layout of size: " 
                 << layout.size() << " to graph of size: " 
                 << size() << endl;
         exit(1);
