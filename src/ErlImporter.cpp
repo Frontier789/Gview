@@ -14,7 +14,8 @@ using std::vector;
 #endif
 
 ErlImporter::ErlImporter(Delegate<void,string> logfunc) : 
-    m_logfunc(std::move(logfunc))
+    m_logfunc(std::move(logfunc)),
+    m_input(false)
 {
     m_logfunc("ErlImporter created");
     prepareStdio();
@@ -23,7 +24,10 @@ ErlImporter::ErlImporter(Delegate<void,string> logfunc) :
         int c;
         
         do {
-            c = cin.peek();
+            {
+                std::lock_guard<std::mutex> guard(m_cin_mut);
+                c = cin.peek();
+            }
             m_input = true;
             fm::Sleep(milliseconds(10));
         } while (c != std::char_traits<char>::eof());
@@ -143,7 +147,6 @@ void ErlImporter::recv(View &view,Delegate<void,string> logFunc)
     
     logFunc("Building graph structure");
     C(nodeN) {
-        logFunc("Node #" + fm::toString(i).str());
         auto &node = view.graph[i + nodeBase];
         node.body.mass = i < Nwts.size() ? Nwts[i] : 1;
         
@@ -155,15 +158,11 @@ void ErlImporter::recv(View &view,Delegate<void,string> logFunc)
     
     logFunc("Directing edges");
     C(nodeN) {
-        logFunc("Node #" + fm::toString(i).str());
         auto &node = view.graph[i + nodeBase];
         
         vector<size_t> to_ids = recv<vector<size_t>>();
-        logFunc("  s: " + fm::toString(node.edges.size()).str());
-        Cx(to_ids.size()) {
-            logFunc("  --> " + fm::toString(to_ids[x]).str());
+        Cx(to_ids.size())
             node.edges[x].to = to_ids[x];
-        }
     }
     
     C(nodeN) {
@@ -172,8 +171,17 @@ void ErlImporter::recv(View &view,Delegate<void,string> logFunc)
         logFunc("Node #" + fm::toString(i).str());
         logFunc("  is of degree " + fm::toString(Ndegs[i]).str());
         logFunc("  has label " + node.visuals.label.text);
-        for (auto e : node.edges)
-            logFunc("  --> " + fm::toString(e.to).str());
+        Cf(node.edges.size(),j) {
+            logFunc("  --> " + fm::toString(node.edges[j].to).str());
+            if (j > 5) {
+                logFunc("  ...");
+            }
+        }
+        
+        if (i > 5) {
+            logFunc("...");
+            i = nodeN;
+        }
     }
     
     C(nodeN) {
@@ -224,14 +232,21 @@ void ErlImporter::recv(string &str)
 
 void ErlImporter::recv(void *data,size_t bytes)
 {
-    cin.read((char*)data,bytes);
+    bool is_eof,is_bad,is_fail;
+    {
+        std::lock_guard<std::mutex> guard(m_cin_mut);
+        cin.read((char*)data,bytes);
+        is_eof = cin.eof();
+        is_bad = cin.bad();
+        is_fail = cin.fail();
+    }
     m_input = false;
     
-    if (cin.eof() || cin.bad() || cin.fail()) {
+    if (is_eof || is_bad || is_fail) {
         string problem = "";
-        if (cin.eof()) problem += "eof";
-        if (cin.bad()) problem += " bad";
-        if (cin.fail()) problem += " fail";
+        if (is_eof) problem += "eof";
+        if (is_bad) problem += " bad";
+        if (is_fail) problem += " fail";
         
         m_res += fm::Result("IOError",fm::Result::OPFailed,"ReadFailed","recv()",__FILE__,__LINE__,"reading from stdin set bit(s): " + problem);
     }

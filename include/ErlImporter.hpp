@@ -4,6 +4,7 @@
 #include "Importer.hpp"
 #include <future>
 #include <atomic>
+#include <mutex>
 
 typedef unsigned char Byte;
 
@@ -33,6 +34,7 @@ public:
     T recv(Extra... extra) {T t; recv(t,extra...); return t;}
     
     fm::Result m_res;
+    std::mutex m_cin_mut; // Note: reading cin is only thread safe if it is synchronised with stdio 
     std::future<void> m_closed;
     std::atomic<bool> m_input;
 };
