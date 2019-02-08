@@ -16,6 +16,19 @@ void ViewPlotter::setView(View view)
     m_empty = false;
     createDD();
 }
+    
+void ViewPlotter::center()
+{
+	center(m_view.aabb());
+}
+
+void ViewPlotter::center(rect2f area)
+{
+	float z = (getSize() / area.size).min() * .75;
+	
+	setOffset(getSize()/2 - (area.pos + area.size/2)*z );
+	setZoom(z);
+}
 
 void ViewPlotter::setLayout(Layout layout)
 {

@@ -6,6 +6,14 @@ using namespace std;
 
 #include "Layout.hpp"
 
+enum class NodeShape
+{
+    Circle   = 1,
+    Square   = 2,
+    Triangle = 3,
+    None     = 0
+};
+
 struct View
 {
     struct Edge {
@@ -20,6 +28,8 @@ struct View
     struct Node {
         struct Visuals {
             float size;
+            NodeShape shape;
+            
             struct Label {
                 String text;
                 
@@ -39,6 +49,7 @@ struct View
     Layout getLayout() const;
     void setLayout(const Layout &layout);
     size_t size() const {return graph.size();}
+    rect2f aabb() const;
 };
 
 #endif

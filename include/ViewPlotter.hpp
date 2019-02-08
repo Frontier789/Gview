@@ -18,6 +18,9 @@ struct ViewPlotter : public GuiElement, public TransformListener
     void onDraw(fg::ShaderManager &shader) override;
     void onTransform() override;
     
+    void center();
+    void center(rect2f area);
+    
     const View &view() const {return m_view;}
 
 private:

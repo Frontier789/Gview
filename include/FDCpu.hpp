@@ -15,7 +15,7 @@ struct FDCpu : public LayoutGen
     void init(const View &view) override;
     void run() override;
     
-    void init_bodies();
+    void init_bodies(const View &view);
     void init_graph(const View &view);
     void print_graph(std::ostream &out);
     void update_bodies();
