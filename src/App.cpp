@@ -5,6 +5,7 @@
 App::App(Delegate<void,string> logFunc) :
     m_importer(nullptr),
     plotter(nullptr),
+    m_gentimeout(milliseconds(1000)),
     logFunc(logFunc)
 {
     
@@ -14,20 +15,38 @@ App::~App() {
     delete m_importer;
 }
 
-void App::prepare() {
-    m_importer = new GridImporter(5);
-    
-    plotter->setView(m_importer->view());
-    Clock clk;
-    m_gen->start(plotter->view());
-    m_gen->wait();
-
-    logFunc("Generation done 🦆");
-    logFunc("\tt = " + fm::toString(clk.s()*1000).str() + "ms");
+void App::updateLayout()
+{
+    Layout l = layoutGen()->layout();
+    plotter->setLayout(std::move(l));
 }
 
+void App::loadCurrentView(CacheId cacheId)
+{
+    m_currCacheId = cacheId;
+    
+    plotter->setView(importer()->view());
+    m_genclk.restart();
+    m_genclk.resume();
+    
+    layoutGen()->start(plotter->view(),m_cache.load(cacheId));
+    updateLayout();
+}
+
+void App::init() {}
+
 void App::update() {
-    plotter->setLayout(m_gen->layout());
+    if (m_genclk.getTime() > m_gentimeout && !m_genclk.isPaused()) {
+        updateLayout();
+    }
+    
+    if (!m_genclk.isPaused() && layoutGen()->ready()) {
+        updateLayout();
+        m_genclk.pause();
+        m_cache.save(m_currCacheId,layoutGen()->layout());
+        logFunc("Generation done 🦆");
+        logFunc("\tt = " + fm::toString(m_genclk.s()*1000).str() + "ms");
+    }
 }
 
 void App::run() {
@@ -37,8 +56,7 @@ void App::run() {
     win.addElement(plotter);
     m_gen = new FDCpu(RKDesc::fehlberg());
     
-    prepare(); // prepare may need a GL context and the plotter
-    
+    init(); // init may need a GL context and the plotter
     
     win.runGuiLoop(Delegate<void>(App::update,this));
 }

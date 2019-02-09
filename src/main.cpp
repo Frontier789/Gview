@@ -3,7 +3,7 @@
 #include <Frontier.hpp>
 using namespace std;
 
-#include "App.hpp"
+#include "GridTestApp.hpp"
 #include "ErlApp.hpp"
 
 struct Gview {
@@ -48,7 +48,7 @@ void Gview::create_app() {
         app = unique_ptr<App>(new ErlApp([&](string s){log_file << "[Erl]: " << s << endl;}));
         
     } else {
-        app = unique_ptr<App>(new App([&](string s){log_file << "[App]: " << s << endl;}));
+        app = unique_ptr<App>(new GridTestApp([&](string s){log_file << "[App]: " << s << endl;}));
     }
 }
 

@@ -8,7 +8,7 @@ struct ErlApp : public App {
     ErlApp(Delegate<void,string> logFunc);
     
     ErlImporter *importer() override {return (ErlImporter*)App::importer();}
-    void prepare() override;
+    void init() override;
     void update() override;
 };
 

@@ -12,6 +12,7 @@ using namespace std;
 struct LayoutGen
 {
     void start(const View &view);
+    void start(const View &view,Layout cached);
     void stop();
     bool ready() const;
     void wait(Time timeout = Time::Inf);
@@ -23,7 +24,7 @@ struct LayoutGen
 private:
 	atomic<bool> m_stopped;
 	future<void> m_fut;
-    void gen_init(const View &view);
+    void gen_init(const View &view,Layout cached);
 
 protected:
 	Layout m_layout;
@@ -32,6 +33,7 @@ protected:
     virtual void run() = 0;
     
     bool stopped() const {return m_stopped;}
+    virtual void init_layout(const View &view);
 };
 
 #endif

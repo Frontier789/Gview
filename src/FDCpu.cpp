@@ -3,10 +3,20 @@
 #include <iomanip>
 #include <iostream>
 
+void FDCpu::init_layout(const View &view)
+{
+    size_t n = view.size();
+    
+    Anglef base = fm::deg(360.0 / n);
+    
+    for (size_t id = 0;id < n;++id) {
+        m_layout.positions[id] = pol2(100 + random.real(-50,50), base * (id + random.real(-180,180)));
+    }
+}
+
 void FDCpu::init(const View &view)
 {
     init_graph(view);
-    m_bodies.resize(view.size());
     init_bodies(view);
     
     m_h = m_rk.h0;
@@ -25,12 +35,13 @@ void FDCpu::print_graph(std::ostream &out)
 
 void FDCpu::init_bodies(const View &view)
 {
-    size_t n = m_bodies.size();
+    size_t n = view.size();
+    m_bodies.resize(n);
     
     Anglef base = fm::deg(360.0 / n);
     
     for (size_t id = 0;id < n;++id) {
-        m_bodies[id].p = pol2(100 + random.real(-50,50), base * (id + random.real(-180,180)));
+        m_bodies[id].p = m_layout.positions[id];
         m_bodies[id].v = vec2(0);
         m_bodies[id].m = view.graph[id].body.mass;
     }

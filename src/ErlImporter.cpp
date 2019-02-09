@@ -175,6 +175,7 @@ void ErlImporter::recv(View &view,Delegate<void,string> logFunc)
             logFunc("  --> " + fm::toString(node.edges[j].to).str());
             if (j > 5) {
                 logFunc("  ...");
+                j = FRONTIER_CF_N_j;
             }
         }
         

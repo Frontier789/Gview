@@ -3,6 +3,7 @@
 
 #include <Frontier.hpp>
 
+#include "CacheManager.hpp"
 #include "ViewPlotter.hpp"
 #include "LayoutGen.hpp"
 #include "Importer.hpp"
@@ -17,12 +18,20 @@ struct App {
     Importer *m_importer;
     ViewPlotter *plotter;
     LayoutGen *m_gen;
+    CacheManager m_cache;
+    Clock m_genclk;
+    Time m_gentimeout;
+    CacheId m_currCacheId;
     Delegate<void,string> logFunc;
     
     virtual Importer *importer() {return m_importer;}
-    virtual void prepare();
+    virtual LayoutGen *layoutGen() {return m_gen;}
+    virtual void init();
     virtual void update();
     void run();
+    
+    void loadCurrentView(CacheId cacheId = "");
+    void updateLayout();
 };
 
 #endif

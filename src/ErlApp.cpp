@@ -3,10 +3,11 @@
 ErlApp::ErlApp(Delegate<void,string> logFunc) :
     App(logFunc)
 {
-    
+    m_cache.setOutFile("test.cache");
+    m_cache.loadFromFile("test.cache");
 }
 
-void ErlApp::prepare() {
+void ErlApp::init() {
     m_importer = new ErlImporter(logFunc);
 }
 
@@ -25,13 +26,7 @@ void ErlApp::update() {
             win.stopGuiLoop();
         }
         if (s == "set_view") {
-            plotter->setView(importer()->view());
-            Clock clk;
-            m_gen->start(plotter->view());
-            m_gen->wait();
-
-            logFunc("Generation done 🦆");
-            logFunc("\tt = " + fm::toString(clk.s()*1000).str() + "ms");
+            loadCurrentView("test_view_id");
         }
     }
 }

@@ -12,7 +12,6 @@ struct FDCpu : public LayoutGen
 {
     FDCpu(RKDesc rk = RKDesc::fehlberg(),bool do_logging = false) : m_rk(rk), random(42) { log.do_log = do_logging; }
     
-    void init(const View &view) override;
     void run() override;
     
     void init_bodies(const View &view);
@@ -45,6 +44,9 @@ private:
     double m_s;
     
     Random random;
+    
+    void init_layout(const View &view) override;
+    void init(const View &view) override;
     
     double distance(const vector<Body> &bodiesFrom,const vector<Body> &bodiesTo);
     

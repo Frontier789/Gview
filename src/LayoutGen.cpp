@@ -13,12 +13,17 @@ LayoutGen::~LayoutGen()
 
 void LayoutGen::start(const View &view)
 {
+    start(view,Layout());
+}
+
+void LayoutGen::start(const View &view,Layout cached)
+{
     if (m_fut.valid() && !::ready(m_fut))
         wait();
     
     m_stopped = false;
     
-    gen_init(view);
+    gen_init(view,std::move(cached));
     init(view);
     
     m_fut = std::async(std::launch::async, [this](){
@@ -53,7 +58,17 @@ Layout LayoutGen::layout() const
     return m_layout;
 }
 
-void LayoutGen::gen_init(const View &view)
+void LayoutGen::init_layout(const View &view)
 {
-    m_layout = std::move(view.getLayout());
+    
+}
+
+void LayoutGen::gen_init(const View &view,Layout cached)
+{
+    if (cached.size() == view.size()) {
+        m_layout = std::move(cached);
+    } else {
+        m_layout = view.getLayout();
+        init_layout(view);
+    }
 }

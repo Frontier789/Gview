@@ -1,2 +1,6 @@
 build
 *.exe
+Flib
+*_test
+*.cache
+fluid.mw
