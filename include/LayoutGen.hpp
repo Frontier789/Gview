@@ -2,38 +2,59 @@
 #define GVIEW_LAYOUTGEN
 
 #include <future>
+#include <mutex>
 
 #include <Frontier.hpp>
 using namespace std;
 
+#include "LogLevel.hpp"
 #include "Layout.hpp"
 #include "View.hpp"
 
 struct LayoutGen
 {
-    void start(const View &view);
-    void start(const View &view,Layout cached);
+    LayoutGen(Delegate<void,LogLevel,string> logfun);
+    
+    fm::Result setTarget(const View &view);
+    fm::Result setTarget(const View &view,Layout cached);
     void stop();
     bool ready() const;
+    bool stopped() const;
     void wait(Time timeout = Time::Inf);
+    size_t nodeCount() const {return m_layoutSize;}
     
-    Layout layout() const;
+    void startWorkerThread();
+    
+    Layout layout();
     
     virtual ~LayoutGen();
     
+    virtual string tag() const {return "layout_gen";}
+    
 private:
-	atomic<bool> m_stopped;
-	future<void> m_fut;
-    void gen_init(const View &view,Layout cached);
+    condition_variable m_inputCond;
+    promise<void> m_genPromise;
+    atomic<bool>  m_stopped;
+    atomic<bool>  m_killed;
+    future<void>  m_genFut;
+    atomic<bool>  m_input;
+    mutex  m_inputMut;
+    thread m_thread;
+
+    fm::Result setup(const View &view,Layout cached);
 
 protected:
 	Layout m_layout;
-    mutable std::mutex m_layoutMut;
-    virtual void init(const View &view) = 0;
+    mutex  m_layoutMut;
+    size_t m_layoutSize;
+    Delegate<void,LogLevel,string> m_logfunc;
+    
+    virtual bool initWorker() {return true;}
+    virtual void finishWorker() {};
+    virtual fm::Result init(const View &view,bool cached) = 0;
     virtual void run() = 0;
     
-    bool stopped() const {return m_stopped;}
-    virtual void init_layout(const View &view);
+    void killWorker();
 };
 
 #endif

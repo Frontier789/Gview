@@ -7,11 +7,16 @@
 #include "GridImporter.hpp"
 
 struct GridTestApp : public App {
-    GridTestApp(Delegate<void,string> logFunc);
+    GridTestApp(Delegate<void,LogLevel,string> logFunc,bool enable_gpu,bool enable_cache);
     
     GridImporter *importer() override {return (GridImporter*)m_importer;}
     
-    void init() override;
+    fm::Result init() override;
+    
+    void writeHelp();
+    void createImporter() override;
+    
+    void createLayoutGen() override;
 };
 
 #endif

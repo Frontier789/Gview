@@ -6,14 +6,15 @@
 #include "CacheManager.hpp"
 #include "ViewPlotter.hpp"
 #include "LayoutGen.hpp"
+#include "LogLevel.hpp"
 #include "Importer.hpp"
 #include "RKDesc.hpp"
-#include "Random.hpp"
 
 struct App {
-    App(Delegate<void,string> logFunc);
+    App(Delegate<void,LogLevel,string> logFunc,bool enable_gpu,bool enable_cache);
     virtual ~App();
     
+protected:
     GuiWindow win;
     Importer *m_importer;
     ViewPlotter *plotter;
@@ -22,16 +23,31 @@ struct App {
     Clock m_genclk;
     Time m_gentimeout;
     CacheId m_currCacheId;
-    Delegate<void,string> logFunc;
+    Delegate<void,LogLevel,string> logFunc;
+    bool enable_gpu;
+    bool enable_cache;
+    View m_curView;
     
+    virtual void createImporter();
+    virtual void createLayoutGen();
+    void saveCurrCache();
+
+public:
     virtual Importer *importer() {return m_importer;}
     virtual LayoutGen *layoutGen() {return m_gen;}
-    virtual void init();
+    virtual fm::Result init();
     virtual void update();
     void run();
+    void stop();
     
-    void loadCurrentView(CacheId cacheId = "");
+    virtual Layout fetchCache(CacheId id) const;
+    
+    void loadCurrentView();
+    void reloadCurrentView();
     void updateLayout();
+    void waitLayoutGen(Time t = Time::Inf);
+    
+    void addKeyHandler();
 };
 
 #endif

@@ -19,10 +19,13 @@ struct View
     struct Edge {
         struct Visuals {
             float width;
+            NodeShape end1;
+            NodeShape end2;
+            vec4 color;
             
         } visuals;
         size_t to;
-        
+        float strength;
     };
     
     struct Node {
@@ -30,18 +33,25 @@ struct View
             float size;
             NodeShape shape;
             
-            struct Label {
-                String text;
-                
-            } label;
-            
         } visuals;
+        
+        struct Label {
+            String text;
+            String tooltip;
+            
+        } label;
         
         struct Body {
             vec2 pos;
             float mass;
         } body;
         
+        struct Selector {
+            String label;
+            size_t id; 
+        };
+        
+        vector<Selector> selectors;
         vector<Edge> edges;
     };
     vector<Node> graph;
@@ -50,6 +60,14 @@ struct View
     void setLayout(const Layout &layout);
     size_t size() const {return graph.size();}
     rect2f aabb() const;
+    
+    vector<string> selectorLabels(size_t nodeId) const;
+    size_t probe(mat4 transf,vec2 mp) const;
+    
+    bool isJoint() const;
+    
+    string getHash() const;
+    
 };
 
 #endif

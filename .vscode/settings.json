@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.ih": "cpp",
         "iostream": "cpp",
         "xstring": "cpp",
         "vector": "cpp",
@@ -72,6 +73,8 @@
         "sstream": "cpp",
         "thread": "cpp",
         "cinttypes": "cpp",
-        "optional": "cpp"
+        "optional": "cpp",
+        "bitset": "cpp",
+        "random": "cpp"
     }
 }

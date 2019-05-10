@@ -13,22 +13,22 @@ using std::vector;
 	#include <fcntl.h>
 #endif
 
-ErlImporter::ErlImporter(Delegate<void,string> logfunc) : 
+
+ErlImporter::ErlImporter(Delegate<void,LogLevel,string> logfunc) : 
     m_logfunc(std::move(logfunc)),
     m_input(false)
 {
-    m_logfunc("ErlImporter created");
     prepareStdio();
     
     m_closed = std::async(std::launch::async, [&]{
         int c;
         
         do {
-            {
+            if (!m_input) {
                 std::lock_guard<std::mutex> guard(m_cin_mut);
                 c = cin.peek();
+                m_input = true;
             }
-            m_input = true;
             fm::Sleep(milliseconds(10));
         } while (c != std::char_traits<char>::eof());
     });
@@ -70,136 +70,179 @@ namespace
     }
 }
 
-namespace
+View::Edge::Visuals loadEdgeVisuals(const vector<size_t> &arr = vector<size_t>())
 {
-    class EdgePalette
-    {
-    public:
-        float width;
-        vec3 color;
-        NodeShape endShapes[2];
-        
-        EdgePalette() : width(1), endShapes{NodeShape::None,NodeShape::None} {}
-        
-        void load(const vector<size_t> &arr)
-        {
-            if (arr.size() < 2) return;
-            width = arr[1] / float(arr[0]);
-            
-            if (arr.size() < 5) return;
-            color = vec3(arr[2],arr[3],arr[4])/255;
-            
-            if (arr.size() < 6) return;
-            endShapes[0] = NodeShape(arr[5]);
-            
-            if (arr.size() < 7) return;
-            endShapes[1] = NodeShape(arr[6]);
-        }
-    };
+    View::Edge::Visuals props{3,NodeShape::None,NodeShape::None,vec4::Black};
+    
+    if (arr.size() < 2) return props;
+    props.width = arr[1] / float(arr[0]);
+    
+    if (arr.size() < 5) return props;
+    props.color = vec3(arr[2],arr[3],arr[4])/255;
+    
+    if (arr.size() < 6) return props;
+    props.end1 = NodeShape(arr[5]);
+    
+    if (arr.size() < 7) return props;
+    props.end2 = NodeShape(arr[6]);
+    
+    return props;
 }
 
-void ErlImporter::recv(View &view,Delegate<void,string> logFunc)
+View::Node::Visuals loadNodeVisuals(const vector<size_t> &arr = vector<size_t>())
+{
+    View::Node::Visuals props{10,NodeShape::Circle};
+    
+    if (arr.size() < 2) return props;
+    props.size = arr[1] / float(arr[0]);
+    
+    if (arr.size() < 3) return props;
+    props.shape = NodeShape(arr[2]);
+    
+    return props;
+}
+
+void ErlImporter::recv(View &view,Delegate<void,LogLevel,string> logFunc)
 {
     vector<size_t> counts = recv<vector<size_t>>();
     
-    logFunc("Receiving view from Erlang");
-    size_t countReq = 2;
+    logFunc(LOG_DATA,"Receiving view from Erlang");
+    size_t countReq = 4;
     
     if (counts.size() != countReq)
     {
-        m_logfunc("Warning: recevied " + fm::toString(counts.size()) + " numbers for header instead of " + fm::toString(countReq).str());
+        m_logfunc(LOG_WARNING,"Recevied " + fm::toString(counts.size()) + " numbers for header instead of " + fm::toString(countReq).str());
         counts.resize(countReq,0);
     }
     else
     {
-        logFunc("Received " + fm::toString(counts.size()).str() + " numbers as header (should be " + fm::toString(countReq).str() + ")");
+        logFunc(LOG_DATA,"Received " + fm::toString(counts.size()).str() + " numbers as header (should be " + fm::toString(countReq).str() + ")");
     }
     
-    size_t paleN = counts[0];
-    size_t nodeN = counts[1];
+    size_t nodes = counts[0];
+    size_t npalS = counts[1];
+    size_t epalS = counts[2];
+    size_t seleN = counts[3];
     
     size_t nodeBase = view.size();
     
-    view.graph.resize(nodeN + nodeBase);
-    vector<EdgePalette> palettes(paleN);
+    view.graph.resize(nodes + nodeBase);
     
-    logFunc("Palette count: " + fm::toString(paleN).str());
-    C(paleN)
+    logFunc(LOG_DATA,"Node palette size: " + fm::toString(npalS).str());
+    node_palette.resize(npalS);
+    C(npalS)
     {
         auto palData = recv<vector<size_t>>();
         
         string palStr;
         for (auto j : palData) palStr += " " + fm::toString(j).str();
-        logFunc("received palette " + fm::toString(i).str() + ":" + palStr);
+        logFunc(LOG_DATA,"received visual " + fm::toString(i).str() + ":" + palStr);
         
-        palettes[i].load(palData);
+        node_palette[i] = loadNodeVisuals(palData);
     }
     
-    logFunc("Receiving vertices: " + fm::toString(nodeN).str());
-    C(nodeN) {
-        auto &visuals = view.graph[i + nodeBase].visuals;
-        visuals.label.text = recv<string>();
+    logFunc(LOG_DATA,"Edge palette size: " + fm::toString(epalS).str());
+    edge_palette.resize(epalS);
+    C(epalS)
+    {
+        auto palData = recv<vector<size_t>>();
+        
+        string palStr;
+        for (auto j : palData) palStr += " " + fm::toString(j).str();
+        logFunc(LOG_DATA,"received visual " + fm::toString(i).str() + ":" + palStr);
+        
+        edge_palette[i] = loadEdgeVisuals(palData);
     }
     
-    vector<size_t> Nwts   = recv<vector<size_t>>();
-    vector<size_t> Ntypes = recv<vector<size_t>>();
-    vector<size_t> Ndegs  = recv<vector<size_t>>();
-    
-    logFunc("Building graph structure");
-    C(nodeN) {
+    logFunc(LOG_DATA,"Vertex count: " + fm::toString(nodes).str());
+    C(nodes) {
         auto &node = view.graph[i + nodeBase];
-        node.body.mass = i < Nwts.size() ? Nwts[i] : 1;
-        
-        node.visuals.size  = i < Ntypes.size() ? palettes[Ntypes[i]].width : 10;
-        node.visuals.shape = i < Ntypes.size() ? palettes[Ntypes[i]].endShapes[0] : NodeShape::Circle;
-        
-        node.edges.resize(Ndegs[i]);
+        node.label.text = recv<string>();
+        logFunc(LOG_DEBUG, "Label #" + fm::toString(i).str() + " is "  + node.label.text);
+    }
+    C(nodes) {
+        auto &node = view.graph[i + nodeBase];
+        node.label.tooltip = recv<string>();
+        logFunc(LOG_DEBUG, "Tooltip #" + fm::toString(i).str() + " is "  + node.label.tooltip);
     }
     
-    logFunc("Directing edges");
-    C(nodeN) {
-        auto &node = view.graph[i + nodeBase];
-        
-        vector<size_t> to_ids = recv<vector<size_t>>();
-        Cx(to_ids.size())
-            node.edges[x].to = to_ids[x];
+    vector<size_t> SelCnt = recv<vector<size_t>>(); logFunc(LOG_DATA, "Selector counts received");
+    vector<string> selLabels(seleN);
+    for (auto &label : selLabels) {
+        label = recv<string>();
     }
     
-    C(nodeN) {
-        auto &node = view.graph[i + nodeBase];
+    logFunc(LOG_DATA, "Received " + fm::toString(SelCnt.size()).str() + " sel counts:");
+    for (auto n : SelCnt) {
+        logFunc(LOG_DATA, fm::toString(n).str());
+    }
+    logFunc(LOG_DATA, "Their " + fm::toString(seleN).str() + " labels: ");
+    for (auto &label : selLabels) {
+        logFunc(LOG_DATA, label);
+    }
+    
+    
+    
+    vector<size_t> Edges  = recv<vector<size_t>>(); logFunc(LOG_DATA, "Edges received");
+    vector<float>  Nwts   = recv<vector<float>>();  logFunc(LOG_DATA, "Nwts received");
+    vector<size_t> Ntypes = recv<vector<size_t>>(); logFunc(LOG_DATA, "Ntypes received");
+    vector<float>  Ewts   = recv<vector<float>>();  logFunc(LOG_DATA, "Ewts received");
+    vector<size_t> Etypes = recv<vector<size_t>>(); logFunc(LOG_DATA, "Etypes received");
+    
+    if (Edges.size() % 2 != 0) {
+        logFunc(LOG_WARNING,"Warning: number edge ends is odd");
+        Edges.pop_back();
+    }
+    
+    size_t edges = Edges.size()/2;
+    
+    Nwts.resize(nodes, 1);
+    Ntypes.resize(nodes, 0);
+    Ewts.resize(edges, 1);
+    Etypes.resize(edges, 0);
+    
+    logFunc(LOG_DATA,"Building graph structure");
+    {
+        auto selBegs = SelCnt;
         
-        logFunc("Node #" + fm::toString(i).str());
-        logFunc("  is of degree " + fm::toString(Ndegs[i]).str());
-        logFunc("  has label " + node.visuals.label.text);
-        Cf(node.edges.size(),j) {
-            logFunc("  --> " + fm::toString(node.edges[j].to).str());
-            if (j > 5) {
-                logFunc("  ...");
-                j = FRONTIER_CF_N_j;
+        for (size_t i=1;i<selBegs.size();i++) {
+            selBegs[i] += selBegs[i-1];
+        }
+        
+        C(nodes) {
+            auto &node = view.graph[i + nodeBase];
+            node.body.mass = Nwts[i];
+            
+            auto type = Ntypes[i];
+            if (type < node_palette.size())
+                node.visuals = node_palette[type];
+            else node.visuals = loadNodeVisuals();
+            
+            if (type < SelCnt.size()) {
+                node.selectors.resize(SelCnt[type]);
+                size_t id = selBegs[type] - SelCnt[type];
+                for (auto &selector : node.selectors) {
+                    selector.id = id;
+                    selector.label = selLabels[id];
+                    id++;
+                }
             }
         }
-        
-        if (i > 5) {
-            logFunc("...");
-            i = nodeN;
-        }
     }
     
-    C(nodeN) {
-        auto &node = view.graph[i + nodeBase];
+    logFunc(LOG_DATA,"Adding edges");
+    C(edges) {
+        auto a = Edges[i*2+0];
+        auto b = Edges[i*2+1];
         
-        vector<size_t> Ewts = recv<vector<size_t>>();
+        logFunc(LOG_DATA, fm::toString(a).str() + " --> " + fm::toString(b).str());
+        
+        auto type = Etypes[i];
+        auto vis  = type < edge_palette.size() ? edge_palette[type] : loadEdgeVisuals();
+        view.graph[a + nodeBase].edges.push_back({vis,b + nodeBase,Ewts[i]});
     }
     
-    C(nodeN) {
-        auto &node = view.graph[i + nodeBase];
-        
-        vector<size_t> Etypes = recv<vector<size_t>>();
-        Cx(Etypes.size())
-            node.edges[x].visuals.width = palettes[Etypes[x]].width;
-    }
-    
-    logFunc("");
+    logFunc(LOG_DATA,"");
 }
 
 void ErlImporter::recv(size_t &length)
@@ -207,6 +250,15 @@ void ErlImporter::recv(size_t &length)
     Byte bytes[4];
     recv((void*)bytes,4);
     length = intFromBytes(bytes);
+}
+
+void ErlImporter::recv(vector<float> &arr)
+{
+    size_t byteLen;
+    recv(byteLen);
+    
+    arr.resize(byteLen/4);
+    recv(&arr[0],byteLen);
 }
 
 void ErlImporter::recv(vector<size_t> &arr)
@@ -240,8 +292,8 @@ void ErlImporter::recv(void *data,size_t bytes)
         is_eof = cin.eof();
         is_bad = cin.bad();
         is_fail = cin.fail();
+        m_input = false;
     }
-    m_input = false;
     
     if (is_eof || is_bad || is_fail) {
         string problem = "";
@@ -251,4 +303,34 @@ void ErlImporter::recv(void *data,size_t bytes)
         
         m_res += fm::Result("IOError",fm::Result::OPFailed,"ReadFailed","recv()",__FILE__,__LINE__,"reading from stdin set bit(s): " + problem);
     }
+}
+
+void ErlImporter::send(size_t num)
+{
+    Byte bytes[4];
+    bytesFromInt(num,bytes);
+    
+    send((void*)bytes,4);
+}
+
+void ErlImporter::send(string str)
+{
+    send(&str[0],str.size());
+}
+
+void ErlImporter::send(const vector<float> &arr)
+{
+    send(&arr[0],arr.size() * sizeof(arr[0]));
+}
+
+void ErlImporter::send(const void *data,size_t bytes)
+{
+    // (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | (buf[3] << 0);
+    
+    Byte bytesArray[4] = {getByte(bytes,3),getByte(bytes,2),getByte(bytes,1),getByte(bytes,0)};
+    cout.write((char*)bytesArray,4);
+    cout.write((char*)data,bytes);
+    cout.flush();
+    
+    if (!cout.good()) m_res += fm::Result("IOError",fm::Result::OPFailed,"WriteFailed","send()",__FILE__,__LINE__,"writting to stdout set resulted in error");
 }

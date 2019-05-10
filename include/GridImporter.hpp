@@ -9,6 +9,9 @@ struct GridImporter : public Importer {
     
     View view() override;
     
+    size_t getN() const {return n;}
+    void setN(size_t new_n) {n = new_n;}
+    
 private:
     size_t n;
 };

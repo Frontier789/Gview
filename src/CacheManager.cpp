@@ -1,14 +1,14 @@
 #include "CacheManager.hpp"
 #include <fstream>
 
-CacheManager::CacheManager(const string &file) : m_outFile(file)
+CacheManager::CacheManager(const string &file) : m_file(file)
 {
     loadFromFile(file);
 }
 
 CacheManager::~CacheManager()
 {
-    saveToFile(m_outFile);
+    saveToFile();
 }
 
 namespace
@@ -68,9 +68,26 @@ namespace
     }
 }
 
-void CacheManager::setOutFile(const string &file)
+fm::Result CacheManager::setFile(const string &file,bool load,bool nonexistError)
 {
-    m_outFile = file;
+    if (!load) {
+        m_file = file;
+        return {};
+    } else {
+        saveToFile();
+        m_file = file;
+        return loadFromFile(nonexistError);
+    }
+}
+
+void CacheManager::clear()
+{
+    m_cache.clear();
+}
+
+fm::Result CacheManager::loadFromFile(bool nonexistError)
+{
+    return loadFromFile(m_file,nonexistError);
 }
 
 fm::Result CacheManager::loadFromFile(const string &file,bool nonexistError)
@@ -97,6 +114,11 @@ fm::Result CacheManager::loadFromFile(const string &file,bool nonexistError)
     if (!in) return fm::Result("CacheError",fm::Result::OPFailed,"InvalidCache","loadFromFile",__FILE__,__LINE__,"Cache file appears to be incorrect");
     
     return fm::Result();
+}
+
+fm::Result CacheManager::saveToFile()
+{
+    return saveToFile(m_file);
 }
 
 fm::Result CacheManager::saveToFile(const string &file)

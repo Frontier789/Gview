@@ -5,11 +5,13 @@
 #include "ErlImporter.hpp"
 
 struct ErlApp : public App {
-    ErlApp(Delegate<void,string> logFunc);
+    ErlApp(Delegate<void,LogLevel,string> logFunc,bool enable_gpu,bool enable_cache);
     
     ErlImporter *importer() override {return (ErlImporter*)App::importer();}
-    void init() override;
+    fm::Result init() override;
     void update() override;
+    
+    void sendTransf();
 };
 
 #endif

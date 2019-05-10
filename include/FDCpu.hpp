@@ -4,30 +4,19 @@
 #include <Frontier.hpp>
 using namespace std;
 
-#include "LayoutGen.hpp"
+#include "FDLayoutGen.hpp"
 #include "RKDesc.hpp"
-#include "Random.hpp"
 
-struct FDCpu : public LayoutGen
+struct FDCpu : public FDLayoutGen
 {
-    FDCpu(RKDesc rk = RKDesc::fehlberg(),bool do_logging = false) : m_rk(rk), random(42) { log.do_log = do_logging; }
+    FDCpu(RKDesc rk = RKDesc::fehlberg(),bool do_logging = false,Delegate<void,LogLevel,string> logfun = nullptr) : FDLayoutGen(rk,do_logging,logfun) {}
     
-    void run() override;
+    fm::Result init_memory(const View &view) override;
+    void update_bodies() override;
     
-    void init_bodies(const View &view);
-    void init_graph(const View &view);
     void print_graph(std::ostream &out);
-    void update_bodies();
-    
-    struct Log {
-        vector<float> h; ///< Stepsize of RK
-        vector<float> e; ///< Error estimate of RK
-        vector<float> s; ///< Maximum of delta of position of bodies
-        vector<int> its; ///< Iterations of RK
-        bool do_log;
-    } log;
 
-private:
+public:
     struct Body {
         vec2 p,v;
         float m;
@@ -37,19 +26,15 @@ private:
         float strength;
     };
     
-    RKDesc m_rk;
     vector<vector<Edge>> m_graph;
     vector<Body> m_bodies;
-    double m_h;
-    double m_s;
     
-    Random random;
-    
-    void init_layout(const View &view) override;
-    void init(const View &view) override;
+    fm::Result init_bodies(const View &view);
+    fm::Result init_graph(const View &view);
     
     double distance(const vector<Body> &bodiesFrom,const vector<Body> &bodiesTo);
     
+    void sync_layout() override;
     void update_with(vector<Body> &bodies,
                      vector<Body> &bodiesH,
                      vector<Body> &bodiesE);

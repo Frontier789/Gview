@@ -18,6 +18,7 @@ struct RKDesc
     vector<double> C_E;
     
     static RKDesc fehlberg();
+    static RKDesc bogacki_shampine();
     static RKDesc heun_euler();
 };
 
