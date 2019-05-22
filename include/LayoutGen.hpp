@@ -31,6 +31,8 @@ struct LayoutGen
     
     virtual string tag() const {return "layout_gen";}
     
+    virtual void toggle(string prop) {(void)prop;}
+    
 private:
     condition_variable m_inputCond;
     promise<void> m_genPromise;

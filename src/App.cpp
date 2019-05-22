@@ -108,8 +108,6 @@ void App::addKeyHandler()
     ctl->onkeypress = [&](Keyboard::Key key){
         if (key == Keyboard::Escape)
             stop();
-        if (key == Keyboard::C)
-            plotter->center();
         if (key == Keyboard::Enter) {
             Image img = win.capture();
             string name = "gview_screenshot0.png";
@@ -122,6 +120,14 @@ void App::addKeyHandler()
             
             img.saveToFile(name);
         }
+        if (key == Keyboard::R && !Keyboard::isKeyHeld(Keyboard::LCtrl) && !Keyboard::isKeyHeld(Keyboard::LShift)) {
+            m_cache.clear();
+            reloadCurrentView();
+        }
+		if (key == Keyboard::R && Keyboard::isKeyHeld(Keyboard::LCtrl) && !Keyboard::isKeyHeld(Keyboard::LShift)) {
+			layoutGen()->toggle("orientation");
+            reloadCurrentView();
+		}
     };
     win.addElement(ctl);
 }

@@ -3,9 +3,10 @@
 using std::cout;
 using std::endl;
 
-TreeImporter::TreeImporter(size_t n,size_t k) :
+TreeImporter::TreeImporter(size_t n,size_t k,bool two_way) :
     n(n),
-    k(k)
+    k(k),
+    two_way(two_way)
 {
     
 }
@@ -47,8 +48,10 @@ View TreeImporter::view()
             node.selectors = {};
             v.graph.push_back(std::move(node));
         }
-        cur_layer = std::move(nxt_layer);
-        nxt_layer.clear();
+        if (i+1 != n) {
+            cur_layer = std::move(nxt_layer);
+            nxt_layer.clear();
+        }
     }
     
     return v;

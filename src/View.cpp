@@ -56,21 +56,21 @@ void View::setLayout(const Layout &layout)
         graph[i].body.pos = layout.positions[i];
 }
 
-rect2f View::aabb() const
+rect2f View::aabb(mat4 transf) const
 {
     if (graph.size() == 0) return rect2f(-1,-1,2,2);
     
     if (graph.size() == 1) {
-        vec2 s = graph[0].visuals.size;
+        vec2 s = transf * vec4(vec2(graph[0].visuals.size),0,0);
         
-        return rect2f(graph[0].body.pos - s,s*2);
+        return rect2f(vec2(transf * vec4(graph[0].body.pos,0,1)) - s,s*2);
     }
     
-    rect2f rct(graph[0].body.pos,vec2());
+    rect2f rct(transf * vec4(graph[0].body.pos,0,1),vec2());
     
     for (auto &node : graph) {
-        vec2 p = node.body.pos;
-        vec2 s = node.visuals.size;
+        vec2 p = transf * vec4(node.body.pos,0,1);
+        vec2 s = transf * vec4(vec2(node.visuals.size),0,0);
         
         rct.expand(p + s);
         rct.expand(p - s);

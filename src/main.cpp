@@ -10,16 +10,21 @@ using namespace std;
 
 /*
 
-Referl intergation kép kifejtése és általános változat az elejére
-layout kép mindekttő algoval (ha lehet)
- redo
+Background részletesebben (egész bekezdés a régiről, meddig jutott az előző TDK)
+Átolvasni az egészet, hogy konzisztens-e
+ - Dataflow előre (?Dataflow:reach_1st([Node],[{back, false}],true)) és írni róla
+ - Billentyűzet kombináció a rotation-re
+ H Layered lehessen rooted
+ H Rotation-t tárolni
+Conclusion merge
+
+2)-ben hivatkozni a bckg-ra, és hogy tovább fejlesztjük
 
 bin\referl -db kcmini
-erlangból layout type switching
 erlangból +button?
 
 
-Layouts: StressMajoring, LayeredTree
+Layouts: StressMajoring
 Constrain zooming
 
 write a lot about:

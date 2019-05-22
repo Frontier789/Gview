@@ -17,7 +17,7 @@ TreeTestApp::TreeTestApp(Delegate<void,LogLevel,string> logFunc,bool enable_gpu,
 }
 
 void TreeTestApp::createImporter() {
-    m_importer = new TreeImporter(3,4);
+    m_importer = new TreeImporter(3,4,true);
 }
 
 void TreeTestApp::createLayoutGen() {
@@ -29,13 +29,6 @@ fm::Result TreeTestApp::init() {
     win.addElement(widget);
     
     widget->onkeypress = [&](Keyboard::Key key){
-        if (key == Keyboard::R) {
-            m_cache.clear();
-            reloadCurrentView();
-        }
-        if (key == Keyboard::L) {
-            plotter->enableLabels(!plotter->areLabelsEnabled());
-        }
         if (key == Keyboard::Plus || key == Keyboard::Minus) {
             int delta = key == Keyboard::Plus ? 1 : -1;
             importer()->setN(importer()->getN() + delta);

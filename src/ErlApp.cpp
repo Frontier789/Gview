@@ -32,21 +32,14 @@ fm::Result ErlApp::init() {
     win.addElement(widget);
     
     widget->onkeypress = [&](Keyboard::Key key){
-        if (key == Keyboard::R) {
-            m_cache.clear();
-            reloadCurrentView();
-        }
         if (key == Keyboard::Backspace || (key == Keyboard::Z && Keyboard::isKeyHeld(Keyboard::LCtrl))) {
             importer()->send("undo");
         }
         if (key == Keyboard::Y && Keyboard::isKeyHeld(Keyboard::LCtrl)) {
             importer()->send("redo");
         }
-        if (key == Keyboard::R && Keyboard::isKeyHeld(Keyboard::LCtrl)) {
+        if (key == Keyboard::R && Keyboard::isKeyHeld(Keyboard::LCtrl) && Keyboard::isKeyHeld(Keyboard::LShift)) {
             importer()->send("reload");
-        }
-        if (key == Keyboard::L) {
-            plotter->enableLabels(!plotter->areLabelsEnabled());
         }
     };
     

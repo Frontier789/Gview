@@ -73,16 +73,16 @@ void ViewPlotter::setView(View view)
     
 void ViewPlotter::center()
 {
-	center(m_view.aabb());
+	center(m_view.aabb(mat4()));
 }
 
-void ViewPlotter::center(rect2f area)
+void ViewPlotter::center(rect2f view_rct)
 {
-	if (area.size.area() == 0) return;
+	if (view_rct.size.area() == 0) return;
 	
-	float z = (getSize() / area.size).min() * .85;
+	float z = (getSize() / view_rct.size).min() * .85;
 	
-	setOffset(getSize()/2 - (area.pos + area.size/2)*z );
+	setOffset(getSize()/2 - (view_rct.pos + view_rct.size/2)*z );
 	setZoom(z);
 	setRotation(0);
 }
@@ -123,7 +123,11 @@ bool ViewPlotter::onEvent(fw::Event &ev)
 	if (ev.type == Event::KeyPressed) {
 		if (ev.key.code == Keyboard::C) {
 			m_autoCenter = true;
+			center();
 		}
+        if (ev.key.code == Keyboard::L) {
+            enableLabels(!areLabelsEnabled());
+        }
 	}
 	
 	if (ev.type == Event::Resized) {

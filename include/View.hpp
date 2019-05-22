@@ -59,7 +59,7 @@ struct View
     Layout getLayout() const;
     void setLayout(const Layout &layout);
     size_t size() const {return graph.size();}
-    rect2f aabb() const;
+    rect2f aabb(mat4 transf = mat4()) const;
     
     vector<string> selectorLabels(size_t nodeId) const;
     size_t probe(mat4 transf,vec2 mp) const;

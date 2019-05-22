@@ -203,10 +203,10 @@ void ErlImporter::recv(View &view,Delegate<void,LogLevel,string> logFunc)
     
     logFunc(LOG_DATA,"Building graph structure");
     {
-        auto selBegs = SelCnt;
+        auto selEnds = SelCnt;
         
-        for (size_t i=1;i<selBegs.size();i++) {
-            selBegs[i] += selBegs[i-1];
+        for (size_t i=1;i<selEnds.size();i++) {
+            selEnds[i] += selEnds[i-1];
         }
         
         C(nodes) {
@@ -220,7 +220,7 @@ void ErlImporter::recv(View &view,Delegate<void,LogLevel,string> logFunc)
             
             if (type < SelCnt.size()) {
                 node.selectors.resize(SelCnt[type]);
-                size_t id = selBegs[type] - SelCnt[type];
+                size_t id = selEnds[type] - SelCnt[type];
                 for (auto &selector : node.selectors) {
                     selector.id = id;
                     selector.label = selLabels[id];

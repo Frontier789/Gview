@@ -4,9 +4,17 @@
 using namespace std;
 
 LayeredLayout::LayeredLayout(Delegate<void,LogLevel,string> logfun) :
-    LayoutGen(logfun)
+    LayoutGen(logfun),
+    down(0,1)
 {
     
+}
+
+void LayeredLayout::toggle(string prop)
+{
+    if (prop == "orientation") {
+        down = down.perp().unsign();
+    }
 }
 
 fm::Result LayeredLayout::init(const View &view,bool cached)
@@ -153,7 +161,8 @@ void LayeredLayout::run()
     Cf(layers.size(),layerId) {
         auto &layer = layers[layerId];
         
-        y_cursor += layer.size()*10 + 50;
+        if (layerId)
+            y_cursor += layer.size()*10 + 50;
         
         for (auto cur : layer) {
             float xpos = 0;
@@ -165,6 +174,12 @@ void LayeredLayout::run()
             }
             l.positions[cur] = vec2(xpos,y_cursor);
         }
+    }
+    
+    vec2 d = down;
+    vec2 r = -down.perp();
+    for (vec2 &p : l.positions) {
+        p = p.x * r + p.y * d;
     }
     
     lock_guard<mutex> guard(m_layoutMut);

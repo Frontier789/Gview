@@ -70,7 +70,14 @@ void Tooltip::onUpdate()
             m_shown = true;
             
             m_guiText->setText(m_str);
-            m_guiText->setPosition(vec3(getLastMousePos() + vec2(8,24),-2));
+            {
+                vec2 size = m_guiText->getSize();
+                vec2 pos = getLastMousePos() + vec2(0,24);
+                vec2 bounds = getSize();
+                if (pos.x + size.w > bounds.w) pos.x = bounds.w - size.w;
+                if (pos.y + size.h > bounds.h) pos.y = bounds.h - size.h;
+                m_guiText->setPosition(vec3(pos,-2));
+            }
             
             vec2 frame = vec2(3,2);
             vec2 pos = m_guiText->getPosition() - frame;
