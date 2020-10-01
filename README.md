@@ -4,7 +4,7 @@ Multiple graph layouts are supported, such as layered tree or force-directed lay
 
 |   |   |
 |:-:|:-:|
-![](screenshots\mnesia_modules.PNG)|![](screenshots\tree.png)
+![](screenshots/mnesia_modules.PNG)|![](screenshots/tree.png)
 Modules of Mnesia|Test tree view
 
 ## Compilation
