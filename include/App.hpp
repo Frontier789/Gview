@@ -32,6 +32,10 @@ protected:
     virtual void createLayoutGen();
     void saveCurrCache();
 
+    void addKeyHandler();
+    void updateLayout();
+    void waitLayoutGen(Time t = Time::Inf);
+    
 public:
     virtual Importer *importer() {return m_importer;}
     virtual LayoutGen *layoutGen() {return m_gen;}
@@ -44,10 +48,6 @@ public:
     
     void loadCurrentView();
     void reloadCurrentView();
-    void updateLayout();
-    void waitLayoutGen(Time t = Time::Inf);
-    
-    void addKeyHandler();
 };
 
 #endif

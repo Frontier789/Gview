@@ -10,7 +10,8 @@ struct ErlApp : public App {
     ErlImporter *importer() override {return (ErlImporter*)App::importer();}
     fm::Result init() override;
     void update() override;
-    
+
+private:
     void sendTransf();
 };
 

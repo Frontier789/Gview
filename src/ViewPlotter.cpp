@@ -215,7 +215,7 @@ void ViewPlotter::findHovered(vec2 mp)
 	}
 }
 
-void ViewPlotter::onUpdate()
+void ViewPlotter::onUpdate(const fm::Time &dt)
 {
 	if (m_mouseHover) {
 		m_mouseHover = false;
@@ -232,7 +232,7 @@ void ViewPlotter::onUpdate()
 		m_selBtns.setTransform(getTransformMatrix());
 	}
 	
-	GuiElement::onUpdate();
+	GuiElement::onUpdate(dt);
 }
 
 void ViewPlotter::createDD()

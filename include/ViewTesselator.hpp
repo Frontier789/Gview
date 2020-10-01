@@ -13,8 +13,6 @@ public:
     ViewTesselator(const View &view,Delegate<void,LogLevel,string> logfunc);
     
     void tess();
-    void tessNodes();
-    void tessEdges();
     
     Mesh line_mesh;
     Mesh tris_mesh;
@@ -28,6 +26,9 @@ public:
 private:
     const View &view;
     Delegate<void,LogLevel,string> m_logFunc;
+    
+    void tessNodes();
+    void tessEdges();
     
     void appendNodeMesh(vec2 p,float r,vec4 outline,vec4 fill,NodeShape shape,vec2 up = vec2(0,1));
     void appendEdgeMesh(vec2 A,vec2 B,float w,vec4 outline,vec4 fill,NodeShape beg,NodeShape end);

@@ -21,7 +21,7 @@ void GridTestApp::writeHelp()
 }
 
 void GridTestApp::createImporter() {
-    m_importer = new GridImporter(3);
+    m_importer = new GridImporter(5);
 }
 
 void GridTestApp::createLayoutGen() {
@@ -63,8 +63,6 @@ fm::Result GridTestApp::init() {
     // m_genclk.pause();
     // logFunc("Generation done 🦆");
     // logFunc("\tt = " + fm::toString(m_genclk.s()*1000).str() + "ms");
-    
-    // updateLayout();
     
     return {};
 }

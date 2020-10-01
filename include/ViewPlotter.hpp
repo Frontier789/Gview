@@ -22,7 +22,7 @@ struct ViewPlotter : public GuiElement, public TransformListener
     bool onEvent(fw::Event &ev) override;
     void onDraw(fg::ShaderManager &shader) override;
     void onTransform(bool userAction) override;
-    void onUpdate() override;
+    void onUpdate(const fm::Time &dt) override;
     
     void enableLabelOverlap(bool enable) {m_labels.doUnintersect(!enable);};
     

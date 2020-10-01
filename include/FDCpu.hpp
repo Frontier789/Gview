@@ -16,7 +16,7 @@ struct FDCpu : public FDLayoutGen
     
     void print_graph(std::ostream &out);
 
-public:
+private:
     struct Body {
         vec2 p,v;
         float m;
@@ -32,8 +32,10 @@ public:
     fm::Result init_bodies(const View &view);
     fm::Result init_graph(const View &view);
     
+    double distance(const vector<Body> &bodiesFrom,const vector<Body> &bodiesTo,const vector<float> &coefs);
     double distance(const vector<Body> &bodiesFrom,const vector<Body> &bodiesTo);
-    
+    double error_estiamte(const vector<Body> &bodiesH,const vector<Body> &bodiesE,const vector<Body> &bodies);
+
     void sync_layout() override;
     void update_with(vector<Body> &bodies,
                      vector<Body> &bodiesH,

@@ -29,7 +29,7 @@ struct CacheManager
     void save(CacheId id,Layout layout);
     void clear();
 
-public:
+private:
     map<CacheId,Layout> m_cache;
     string m_file;
 };

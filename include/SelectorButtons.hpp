@@ -26,7 +26,6 @@ struct SelectorButtons : public GuiElement
     bool visible() const {return m_visible;}
     
     void probe(vec2 mp);
-    void setHovered(size_t i);
     size_t getHovered() const {return m_hoverId;}
     size_t getNodeId() const {return m_nodeId;}
     
@@ -42,6 +41,7 @@ private:
     Delegate<void,LogLevel,string> m_logFunc;
     
     void createDD();
+    void setHovered(size_t i);
 };
 
 #endif

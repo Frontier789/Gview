@@ -13,6 +13,7 @@ struct TreeTestApp : public App {
     
     fm::Result init() override;
     
+private:
     void createImporter() override;
     void createLayoutGen() override;
 };

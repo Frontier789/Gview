@@ -58,7 +58,7 @@ void Tooltip::do_hide()
     m_bckgSpr.setPosition(m_bckgSpr.getSize()*-2.f);
 }
 
-void Tooltip::onUpdate()
+void Tooltip::onUpdate(const fm::Time &)
 {
     if (m_shown && !m_shouldShow) {
         if (m_clk.s() > .2) {

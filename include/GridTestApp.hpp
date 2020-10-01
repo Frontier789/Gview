@@ -12,7 +12,8 @@ struct GridTestApp : public App {
     GridImporter *importer() override {return (GridImporter*)m_importer;}
     
     fm::Result init() override;
-    
+
+private:
     void writeHelp();
     void createImporter() override;
     

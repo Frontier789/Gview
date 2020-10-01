@@ -62,7 +62,7 @@ void FDCpu::sync_layout()
         m_layout.positions[i] = m_bodies[i].p;
 }
     
-double distance(const vector<FDCpu::Body> &bodiesFrom,const vector<FDCpu::Body> &bodiesTo,const vector<float> &coefs)
+double FDCpu::distance(const vector<Body> &bodiesFrom,const vector<Body> &bodiesTo,const vector<float> &coefs)
 {
     double dist = -1;
     
@@ -86,7 +86,7 @@ double FDCpu::distance(const vector<Body> &bodiesFrom,const vector<Body> &bodies
     return sqrt(dist);
 }
 
-double error_estiamte(const vector<FDCpu::Body> &bodiesH,const vector<FDCpu::Body> &bodiesE,const vector<FDCpu::Body> &bodies)
+double FDCpu::error_estiamte(const vector<Body> &bodiesH,const vector<Body> &bodiesE,const vector<Body> &bodies)
 {
     double err = -1;
     

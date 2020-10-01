@@ -10,34 +10,7 @@ using namespace std;
 
 /*
 
-Background részletesebben (egész bekezdés a régiről, meddig jutott az előző TDK)
-Átolvasni az egészet, hogy konzisztens-e
- - Dataflow előre (?Dataflow:reach_1st([Node],[{back, false}],true)) és írni róla
- - Billentyűzet kombináció a rotation-re
- H Layered lehessen rooted
- H Rotation-t tárolni
-Conclusion merge
-
-2)-ben hivatkozni a bckg-ra, és hogy tovább fejlesztjük
-
-bin\referl -db kcmini
-erlangból +button?
-
-
-Layouts: StressMajoring
-Constrain zooming
-
-write a lot about:
-    protocol between erl and cpp
-    program source transform of compute shader
-    performance comparison of gpu cpu impl
-    memory caolescing
-
-Add finished flag to layout cache
-Label hiding (make faster?)
-LayeredLayout
-
-Dynamic switch of layout algo
+Ábra hogyan kell magyarul?
 
 */
 

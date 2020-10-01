@@ -13,7 +13,7 @@ struct Tooltip : public GuiElement, public MouseMoveListener
     void setText(String str);
     
     void onMouseMove(fm::vec2 p,fm::vec2 prevP) override;
-    void onUpdate() override;
+    void onUpdate(const fm::Time &dt) override;
 
 private:
     void hide();
